@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MailArmor</title>
+  <!-- Modern Inter Font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="extension-container">
+    <!-- Header Area -->
+    <header class="app-header">
+      <div class="header-left">
+        <img src="icons/icon48.png" alt="MailArmor Logo" class="app-logo-img">
+        <h1 class="app-title">MailArmor</h1>
+      </div>
+      <div class="header-right">
+        <!-- Pro Mode Simulator Switch -->
+        <span id="pro-badge" class="pro-badge free-mode">Free</span>
+        <!-- Hindi/English language toggle -->
+        <button id="lang-toggle" class="lang-toggle-btn">हिं</button>
+      </div>
+    </header>
+
+    <!-- Tab Navigation Bar -->
+    <div class="tab-navigation">
+      <button id="tab-btn-scan" class="tab-btn active">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span class="tab-btn-text">Scan</span>
+      </button>
+      <button id="tab-btn-dash" class="tab-btn">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span class="tab-btn-text">Dash</span>
+      </button>
+      <button id="tab-btn-history" class="tab-btn">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span class="tab-btn-text">History</span>
+      </button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="app-content">
+      <!-- PANEL 1: SCAN -->
+      <div id="panel-scan" class="tab-panel">
+        <!-- Status Card with default neutral state -->
+        <div id="status-card" class="status-card state-neutral">
+          <div id="status-icon" class="status-icon">🔍</div>
+          <div id="status-text" class="status-text">Click Scan to analyze the current email</div>
+        </div>
+
+        <!-- Phishing Risk Rating Score Indicator -->
+        <div id="risk-score-container" class="risk-score-container hidden">
+          <div class="risk-score-header">
+            <span id="risk-score-label" class="risk-score-label">Phishing Probability:</span>
+            <span id="risk-score-value" class="risk-score-value">0/100</span>
+          </div>
+          <div class="risk-score-bar-bg">
+            <div id="risk-score-bar" class="risk-score-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Explanation/Reason Text -->
+        <div id="reason-container" class="reason-container hidden">
+          <p id="reason-text" class="reason-text"></p>
+        </div>
+
+        <!-- Detailed Security Checklist (hidden by default) -->
+        <div id="checklist-container" class="checklist-container hidden">
+          <h3 id="checklist-heading" class="checklist-heading">Security Audit Checklist</h3>
+          <div id="checklist-items" class="checklist-items">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Action Area -->
+        <div class="action-container">
+          <!-- Trust Sender Button (hidden by default, shown when email is scanned/loaded) -->
+          <button id="trust-btn" class="btn btn-secondary hidden">
+            <span>✅ Trust Sender</span>
+          </button>
+          
+          <!-- Copy Warning Button (hidden by default) -->
+          <button id="copy-warning-btn" class="btn btn-warning hidden">
+            <span>📋 Copy Warning</span>
+          </button>
+
+          <!-- Scan Button -->
+          <button id="scan-btn" class="btn btn-primary">
+            <span class="btn-text">Scan This Email</span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+
+          <!-- Error Message (hidden by default) -->
+          <div id="error-message" class="error-message hidden"></div>
+
+          <!-- Upgrade Prompt (hidden by default) -->
+          <div id="upgrade-container" class="upgrade-container hidden">
+            <p id="upgrade-message" class="upgrade-message">You've used all free scans. Upgrade to Pro for unlimited scans 🔒</p>
+            <a id="upgrade-link" href="YOUR_GUMROAD_LINK" target="_blank" class="btn btn-upgrade">
+              Upgrade — $5/month
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: DASHBOARD -->
+      <div id="panel-dash" class="tab-panel hidden">
+        <div class="stats-summary-grid">
+          <div class="stats-card">
+            <span id="dash-scanned-val" class="stats-num">0</span>
+            <span id="dash-scanned-label" class="stats-label">Total Scanned</span>
+          </div>
+          <div class="stats-card highlight-threat">
+            <span id="dash-threats-val" class="stats-num">0</span>
+            <span id="dash-threats-label" class="stats-label">Threats Blocked</span>
+          </div>
+          <div class="stats-card highlight-suspicious">
+            <span id="dash-suspicious-val" class="stats-num">0</span>
+            <span id="dash-suspicious-label" class="stats-label">Suspicious Found</span>
+          </div>
+        </div>
+
+        <!-- 7-Day Chart -->
+        <div class="chart-container">
+          <h4 id="chart-heading" class="section-subheading">7-Day Scan Activity</h4>
+          <div id="chart-bars" class="chart-bars">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Manage Whitelist Section -->
+        <div class="whitelist-section">
+          <h4 id="whitelist-heading" class="section-subheading">Manage Whitelist</h4>
+          <ul id="whitelist-list" class="whitelist-list">
+            <!-- Whitelisted domains with removal buttons -->
+          </ul>
+          <p id="whitelist-empty-msg" class="whitelist-empty-msg hidden">No domains whitelisted yet.</p>
+        </div>
+
+        <!-- Export Buttons Container -->
+        <div class="export-container" style="display: flex; gap: 6px;">
+          <button id="export-pdf-btn" class="btn btn-secondary" style="flex: 1.2; padding: 10px 4px; font-size: 11px;">
+            <span>📊 PDF Report</span>
+          </button>
+          <button id="export-csv-btn" class="btn btn-secondary" style="flex: 1; padding: 10px 4px; font-size: 11px;">
+            <span>📥 CSV</span>
+          </button>
+          <button id="export-json-btn" class="btn btn-secondary" style="flex: 1; padding: 10px 4px; font-size: 11px;">
+            <span>📥 JSON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PANEL 3: HISTORY -->
+      <div id="panel-history" class="tab-panel hidden">
+        <div class="history-container">
+          <h4 id="history-heading" class="section-subheading">Scan History</h4>
+          <div id="history-list" class="history-list">
+            <!-- Scans populated dynamically -->
+          </div>
+          <p id="history-empty-msg" class="history-empty-msg hidden">No scans recorded yet.</p>
+          <div id="history-upgrade-prompt" class="history-upgrade-card hidden">
+            <span id="history-upgrade-text">Showing last 5 scans. Upgrade to Pro to see all 50 scans.</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Area -->
+    <footer class="app-footer">
+      <div id="scan-count-text" class="scan-count-text">Free scans used: 0 / 20</div>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

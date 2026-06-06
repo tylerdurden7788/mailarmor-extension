@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MailArmor Security Audit Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 40px;
+      line-height: 1.5;
+    }
+    
+    .report-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .header-left h1 {
+      margin: 0;
+      font-size: 26px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+    
+    .header-left p {
+      margin: 5px 0 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    .logo-placeholder {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+    
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+      font-size: 13px;
+    }
+    
+    th {
+      background-color: #f8fafc;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text-muted);
+    }
+    
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .badge-safe {
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+    
+    .badge-suspicious {
+      background-color: #fef3c7;
+      color: #b45309;
+    }
+    
+    .badge-dangerous {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+    
+    /* Print CSS styling */
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .report-container {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .stat-card {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .badge-safe {
+        background-color: #dcfce7 !important;
+        color: #15803d !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .badge-suspicious {
+        background-color: #fef3c7 !important;
+        color: #b45309 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .badge-dangerous {
+        background-color: #fee2e2 !important;
+        color: #b91c1c !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      th {
+        background-color: #f1f5f9 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      tr:nth-child(even) td {
+        background-color: #f8fafc !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="report-container">
+    <div class="header">
+      <div class="header-left">
+        <h1>MailArmor Scan Report</h1>
+        <p id="report-date">Generated on: --</p>
+      </div>
+      <div class="logo-placeholder">📊 MailArmor Pro</div>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div id="stat-scanned" class="stat-value">0</div>
+        <div class="stat-label">Total Scans</div>
+      </div>
+      <div class="stat-card">
+        <div id="stat-threats" class="stat-value">0</div>
+        <div class="stat-label">Threats Blocked</div>
+      </div>
+      <div class="stat-card">
+        <div id="stat-suspicious" class="stat-value">0</div>
+        <div class="stat-label">Suspicious Flagged</div>
+      </div>
+    </div>
+    
+    <h2>Scan History Summary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Verdict</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody id="history-rows">
+        <!-- Rendered dynamically -->
+      </tbody>
+    </table>
+    
+    <div class="footer">
+      This security audit report was automatically generated by MailArmor - Phishing Protection for Gmail.
+    </div>
+  </div>
+
+  <script>
+    // Escapes HTML special characters to prevent cross-site scripting (XSS) injections.
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Fetch and populate report details on DOM load
+    document.addEventListener("DOMContentLoaded", () => {
+      // Set current date
+      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      document.getElementById("report-date").innerText = `Generated on: ${new Date().toLocaleDateString(undefined, options)}`;
+      
+      // Load data from storage
+      chrome.storage.local.get(["stats", "scanHistory"], (data) => {
+        const stats = data.stats || { totalScanned: 0, threatsBlocked: 0, suspiciousFound: 0 };
+        const history = data.scanHistory || [];
+        
+        // Populate stats
+        document.getElementById("stat-scanned").innerText = stats.totalScanned || 0;
+        document.getElementById("stat-threats").innerText = stats.threatsBlocked || 0;
+        document.getElementById("stat-suspicious").innerText = stats.suspiciousFound || 0;
+        
+        // Populate history
+        const rowsContainer = document.getElementById("history-rows");
+        if (history.length === 0) {
+          rowsContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b;">No scan history available.</td></tr>`;
+        } else {
+          let rowsHtml = "";
+          history.forEach(item => {
+            const badgeClass = item.verdict === "SAFE" ? "badge-safe" : (item.verdict === "SUSPICIOUS" ? "badge-suspicious" : "badge-dangerous");
+            const verdictText = item.verdict === "SAFE" ? "Safe" : (item.verdict === "SUSPICIOUS" ? "Suspicious" : "Phishing");
+            
+            // Truncate values to fit print width
+            const senderText = item.sender.length > 30 ? item.sender.substring(0, 28) + "..." : item.sender;
+            const subjectText = item.subject.length > 30 ? item.subject.substring(0, 28) + "..." : item.subject;
+            
+            rowsHtml += `
+              <tr>
+                <td>${escapeHtml(item.timestamp || "")}</td>
+                <td title="${escapeHtml(item.sender)}">${escapeHtml(senderText)}</td>
+                <td title="${escapeHtml(item.subject)}">${escapeHtml(subjectText)}</td>
+                <td><span class="badge ${badgeClass}">${escapeHtml(verdictText)}</span></td>
+                <td style="font-weight: 600;">${escapeHtml(item.score)}/100</td>
+              </tr>
+            `;
+          });
+          rowsContainer.innerHTML = rowsHtml;
+        }
+        
+        // Trigger automatic printing after dynamic content is written
+        setTimeout(() => {
+          window.print();
+        }, 300);
+      });
+    });
+  </script>
+</body>
+</html>
