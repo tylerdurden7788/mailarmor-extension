@@ -40,6 +40,14 @@ style.textContent = `
     color: #374151;
     border-color: #d1d5db;
   }
+  .mailarmor-badge-scan {
+    background-color: #e8f0fe;
+    color: #1a73e8;
+    border-color: #d2e3fc;
+  }
+  .mailarmor-badge-scan:hover {
+    background-color: #d2e3fc;
+  }
   .mailarmor-badge-safe {
     background-color: #ecfdf5;
     color: #047857;
@@ -249,6 +257,7 @@ function checkEmailOpened() {
 function getTranslation(key, lang) {
   const dict = {
     en: {
+      scanBadge: "🛡️ Scan Email",
       safeBadge: "✅ Safe Email",
       suspiciousBadge: "⚠️ Suspicious",
       dangerousBadge: "🚨 Phishing Threat",
@@ -271,6 +280,7 @@ function getTranslation(key, lang) {
       failedText: "Warning"
     },
     hi: {
+      scanBadge: "🛡️ ईमेल स्कैन करें",
       safeBadge: "✅ सुरक्षित ईमेल",
       suspiciousBadge: "⚠️ संदेहास्पद",
       dangerousBadge: "🚨 फ़िशिंग ख़तरा",
@@ -676,22 +686,35 @@ function showLinkWarningModal(url, result) {
  * Orchestrates rendering the badge, checking caching, and triggering auto-scan.
  */
 function handleNewEmailOpen(elements, emailKey) {
-  injectBadge(elements.subjectEl);
+  if (!isContextValid()) return;
+  chrome.storage.local.get(["lang"], (data) => {
+    if (!isContextValid()) return;
+    const lang = data.lang || "en";
+
+    injectBadge(elements.subjectEl, lang, () => {
+      performScan(elements, emailKey, lang);
+    });
+  });
+}
+
+/**
+ * Triggers the actual scanning logic for the email when manually requested.
+ */
+function performScan(elements, emailKey, lang) {
+  const badge = document.querySelector(".mailarmor-badge");
+  if (!badge) return;
+
+  badge.className = "mailarmor-badge mailarmor-badge-loading";
+  badge.innerHTML = `<span class="mailarmor-spinner"></span> <span>${getTranslation("loadingBadge", lang)}</span>`;
 
   if (!isContextValid()) return;
-  chrome.storage.local.get(["cachedScans", "lang", "whitelist", "isPro"], (data) => {
+  chrome.storage.local.get(["cachedScans", "whitelist", "isPro"], (data) => {
     if (!isContextValid()) return;
     const cachedScans = data.cachedScans || {};
-    const lang = data.lang || "en";
     const whitelist = data.whitelist || [];
     const isPro = !!data.isPro;
 
-    const badgeLoading = document.querySelector(".mailarmor-badge");
-    if (badgeLoading && badgeLoading.classList.contains("mailarmor-badge-loading")) {
-      badgeLoading.innerHTML = `<span class="mailarmor-spinner"></span> <span>${getTranslation("loadingBadge", lang)}</span>`;
-    }
-
-    // Whitelist check
+    // 1. Whitelist check
     const domain = getDomainFromSender(elements.sender);
     if (domain && whitelist.includes(domain)) {
       const whitelistResult = {
@@ -714,7 +737,7 @@ function handleNewEmailOpen(elements, emailKey) {
       return;
     }
 
-    // Cache check
+    // 2. Cache check
     if (cachedScans[emailKey]) {
       const attachments = detectAttachments(elements.bodyEl);
       const dangerousExtensions = ['.exe', '.zip', '.rar', '.bat', '.js', '.vbs'];
@@ -734,14 +757,14 @@ function handleNewEmailOpen(elements, emailKey) {
       return;
     }
 
-    // Load hardened scan count to enforce limits check
+    // 3. Load hardened scan count to enforce limits check
     getScanCount((scanCount) => {
       if (!isPro && scanCount >= MAX_FREE_SCANS) {
         updateBadgeToLimitState(lang);
         return;
       }
 
-      // Background scan trigger
+      // 4. Background scan trigger
       if (!isContextValid()) return;
       chrome.runtime.sendMessage(
         {
@@ -792,7 +815,7 @@ function handleNewEmailOpen(elements, emailKey) {
 /**
  * Creates and injects the badge structure into the DOM.
  */
-function injectBadge(subjectEl) {
+function injectBadge(subjectEl, lang, onScanClick) {
   removeBadge();
 
   const container = document.createElement("div");
@@ -800,8 +823,8 @@ function injectBadge(subjectEl) {
   container.className = "mailarmor-badge-container";
 
   const badge = document.createElement("div");
-  badge.className = "mailarmor-badge mailarmor-badge-loading";
-  badge.innerHTML = '<span class="mailarmor-spinner"></span> <span>Analyzing Email...</span>';
+  badge.className = "mailarmor-badge mailarmor-badge-scan";
+  badge.innerHTML = getTranslation("scanBadge", lang);
   container.appendChild(badge);
 
   const dropdown = document.createElement("div");
@@ -811,7 +834,11 @@ function injectBadge(subjectEl) {
 
   badge.addEventListener("click", (e) => {
     e.stopPropagation();
-    dropdown.classList.toggle("show");
+    if (badge.classList.contains("mailarmor-badge-scan")) {
+      onScanClick();
+    } else if (!badge.classList.contains("mailarmor-badge-loading")) {
+      dropdown.classList.toggle("show");
+    }
   });
 
   dropdown.addEventListener("click", (e) => {
