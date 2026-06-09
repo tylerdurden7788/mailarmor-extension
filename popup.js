@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   proBadge.addEventListener("click", handleToggleProSimulator);
   langToggle.addEventListener("click", handleToggleLanguage);
 
-  // Gumroad Link
+  // Lemon Squeezy Link
   upgradeLink.addEventListener("click", (e) => {
     e.preventDefault();
     const url = upgradeLink.getAttribute("href");
