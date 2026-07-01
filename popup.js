@@ -5,7 +5,7 @@
  */
 
 // Configuration
-const MAX_FREE_SCANS = 20;
+const MAX_FREE_SCANS = 10;
 
 // Translations dictionary
 const translations = {

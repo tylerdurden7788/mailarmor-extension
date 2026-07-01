@@ -201,7 +201,7 @@ style.textContent = `
 document.head.appendChild(style);
 
 let currentEmailKey = "";
-const MAX_FREE_SCANS = 20;
+const MAX_FREE_SCANS = 10;
 
 /**
  * Extracts key elements from the Gmail DOM.
@@ -275,7 +275,7 @@ function getTranslation(key, lang) {
       content_check: "Content Verification",
       domain_check: "Domain Age Check",
       attachment_check: "Attachment Check",
-      limitDesc: "You've used all 20 free scans. Open the MailArmor extension popup in your browser toolbar to upgrade to Pro for unlimited scans 🔒",
+      limitDesc: "You've used all 10 free scans. Open the MailArmor extension popup in your browser toolbar to upgrade to Pro for unlimited scans 🔒",
       passedText: "Passed",
       failedText: "Warning"
     },
@@ -298,7 +298,7 @@ function getTranslation(key, lang) {
       content_check: "सामग्री सत्यापन",
       domain_check: "डोमेन आयु जांच",
       attachment_check: "अटैचमेंट जांच",
-      limitDesc: "आपने सभी 20 मुफ़्त स्कैन का उपयोग कर लिया है। असीमित स्कैन के लिए अपग्रेड करने के लिए ब्राउज़र टूलबार में MailArmor एक्सटेंशन खोलें 🔒",
+      limitDesc: "आपने सभी 10 मुफ़्त स्कैन का उपयोग कर लिया है। असीमित स्कैन के लिए अपग्रेड करने के लिए ब्राउज़र टूलबार में MailArmor एक्सटेंशन खोलें 🔒",
       passedText: "उत्तीर्ण",
       failedText: "चेतावनी"
     }
