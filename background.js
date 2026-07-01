@@ -25,7 +25,7 @@ chrome.commands.onCommand.addListener((command) => {
 // Proxy API requests from content scripts / popup to the local FastAPI server and perform domain checks
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "analyzeEmail") {
-    const API_URL = "http://127.0.0.1:8000/analyze";
+    const API_URL = "https://mailarmor-extension-production.up.railway.app/analyze";
     const emailData = request.emailData || {};
     
     // Extract domain from sender
@@ -106,7 +106,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           if (!res.ok) throw new Error("Could not connect to server. Try again.");
           return res.json();
         }).catch(err => {
-          throw new Error("MailArmor server is offline. Please ensure the backend is running at http://127.0.0.1:8000");
+          throw new Error("MailArmor server is offline. Please ensure the backend is running at https://mailarmor-extension-production.up.railway.app");
         });
 
         const domainPromise = checkDomainAge(domain);

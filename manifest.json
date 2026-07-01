@@ -9,8 +9,7 @@
   ],
   "host_permissions": [
     "https://mail.google.com/*",
-    "http://127.0.0.1:8000/*",
-    "https://mailarmor-production.up.railway.app/*",
+    "https://mailarmor-extension-production.up.railway.app/*",
     "https://api.domainsdb.info/*"
   ],
   "action": {
