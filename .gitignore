@@ -13,3 +13,9 @@ __pycache__/
 # Sensitive Configurations
 server/.env
 .env
+
+# Backups and temporary test directories
+mailarmor-final/
+mailarmor-test/
+mailarmor-final.zip
+
