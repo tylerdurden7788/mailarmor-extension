@@ -110,9 +110,38 @@
           <!-- Upgrade Prompt (hidden by default) -->
           <div id="upgrade-container" class="upgrade-container hidden">
             <p id="upgrade-message" class="upgrade-message">You've used all free scans. Upgrade to Pro for unlimited scans 🔒</p>
-            <a id="upgrade-link" href="https://mailarmor.lemonsqueezy.com/checkout/buy/fa6703f5-cbe5-4539-a541-8b077cc17591" target="_blank" class="btn btn-upgrade">
-              Upgrade — $5/month
+            
+            <!-- Option 1: Monthly -->
+            <a id="upgrade-monthly-link" href="https://mailarmor.lemonsqueezy.com/checkout/buy/fa6703f5-cbe5-4539-a541-8b077cc17591" target="_blank" class="btn btn-primary" style="width: 100%;">
+              ₹199/month — Subscribe
             </a>
+
+            <!-- Option 2: Lifetime -->
+            <a id="upgrade-lifetime-link" href="https://mailarmor.lemonsqueezy.com/checkout/buy/c7f24297-0668-436c-b8f5-6fc4135ca21a" target="_blank" class="btn btn-gold" style="width: 100%; margin-top: 6px;">
+              ₹600 — Lifetime Access ⭐ Best Value
+            </a>
+            <div class="lifetime-subtext">Pay once, use forever. No monthly fees!</div>
+
+            <!-- Option 3: UPI Payment -->
+            <div class="upi-section">
+              <h4 class="upi-title">Pay via UPI 🇮🇳</h4>
+              <img src="icons/upi-qr.png" class="upi-qr-code" alt="UPI QR Code">
+              <p class="upi-subtext">Scan to pay ₹199/month or ₹600 lifetime</p>
+              <div class="upi-id-box">
+                <span>UPI ID: geekrishharish07-2@okhdfcbank</span>
+              </div>
+              <p class="upi-instructions">After paying, email mailarmor.app@gmail.com with your payment screenshot for instant Pro access</p>
+            </div>
+          </div>
+
+          <!-- License Key Activation Section -->
+          <div id="license-container" class="license-section">
+            <h4 id="license-heading" class="license-heading">Already paid? Enter your license key</h4>
+            <div class="license-input-group">
+              <input type="text" id="license-input" class="license-input" placeholder="Enter key e.g. MAIL-2026-XXXX-YYYY">
+              <button id="license-btn" class="btn btn-primary btn-license">Activate Pro</button>
+            </div>
+            <div id="license-message" class="license-message hidden"></div>
           </div>
         </div>
       </div>

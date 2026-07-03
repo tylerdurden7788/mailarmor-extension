@@ -33,6 +33,10 @@ const translations = {
     checklistHeading: "Security Audit Checklist",
     freeScansUsed: "Free scans used: {count} / {max}",
     upgradeMsg: "You've used all free scans. Upgrade to Pro for unlimited scans 🔒",
+    licenseHeading: "Already paid? Enter your license key",
+    licenseBtn: "Activate Pro",
+    licenseSuccess: "✅ Pro activated! Enjoy unlimited scans.",
+    licenseError: "❌ Invalid key. Please check and try again.",
     
     // Dashboard Tab elements
     scannedLabel: "Total Scanned",
@@ -91,6 +95,10 @@ const translations = {
     checklistHeading: "सुरक्षा ऑडिट चेकलिस्ट",
     freeScansUsed: "मुफ़्त स्कैन उपयोग: {count} / {max}",
     upgradeMsg: "आपने सभी मुफ़्त स्कैन का उपयोग कर लिया है। असीमित स्कैन के लिए प्रो में अपग्रेड करें 🔒",
+    licenseHeading: "पहले से भुगतान किया? लाइसेंस की दर्ज करें",
+    licenseBtn: "प्रो सक्रिय करें",
+    licenseSuccess: "✅ प्रो सक्रिय! असीमित स्कैन का आनंद लें.",
+    licenseError: "❌ अमान्य की. कृपया जांचें और पुनः प्रयास करें.",
     
     // Dashboard Tab elements
     scannedLabel: "कुल स्कैन किया गया",
@@ -162,7 +170,8 @@ const scanBtn = document.getElementById("scan-btn");
 const errorMessage = document.getElementById("error-message");
 const upgradeContainer = document.getElementById("upgrade-container");
 const upgradeMessage = document.getElementById("upgrade-message");
-const upgradeLink = document.getElementById("upgrade-link");
+const upgradeMonthlyLink = document.getElementById("upgrade-monthly-link");
+const upgradeLifetimeLink = document.getElementById("upgrade-lifetime-link");
 
 // Dashboard Tab Elements
 const dashScannedVal = document.getElementById("dash-scanned-val");
@@ -190,17 +199,38 @@ const historyUpgradeText = document.getElementById("history-upgrade-text");
 // Footer
 const scanCountText = document.getElementById("scan-count-text");
 
+// License key elements
+const licenseContainer = document.getElementById("license-container");
+const licenseHeading = document.getElementById("license-heading");
+const licenseInput = document.getElementById("license-input");
+const licenseBtn = document.getElementById("license-btn");
+const licenseMessage = document.getElementById("license-message");
+
 // Initial Setup
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Load language preference
-  chrome.storage.local.get(["lang", "isPro"], (data) => {
-    currentLanguage = data.lang || "en";
-    langToggle.innerText = currentLanguage === "hi" ? "EN" : "हिं";
-    
-    const isPro = !!data.isPro;
-    updateProBadgeUI(isPro);
-    
-    applyLanguage(currentLanguage);
+  // 1. Load language preference & Pro status (synchronized between local and sync storage)
+  chrome.storage.local.get(["lang", "isPro", "licenseKey"], (localData) => {
+    chrome.storage.sync.get(["isPro", "licenseKey"], (syncData) => {
+      let isPro = !!localData.isPro || !!syncData.isPro;
+      let licenseKey = localData.licenseKey || syncData.licenseKey || "";
+      
+      // Auto-activate Pro if valid license key exists in storage
+      if (!isPro && licenseKey.startsWith("MAIL-") && licenseKey.length >= 18) {
+        isPro = true;
+      }
+      
+      // Align storage if there are discrepancies
+      if (isPro !== localData.isPro || isPro !== syncData.isPro || licenseKey !== localData.licenseKey || licenseKey !== syncData.licenseKey) {
+        chrome.storage.local.set({ isPro: isPro, licenseKey: licenseKey });
+        chrome.storage.sync.set({ isPro: isPro, licenseKey: licenseKey });
+      }
+      
+      currentLanguage = localData.lang || "en";
+      langToggle.innerText = currentLanguage === "hi" ? "EN" : "हिं";
+      
+      updateProBadgeUI(isPro);
+      applyLanguage(currentLanguage);
+    });
   });
 
   // 2. Pre-load active email details
@@ -221,12 +251,53 @@ document.addEventListener("DOMContentLoaded", async () => {
   proBadge.addEventListener("click", handleToggleProSimulator);
   langToggle.addEventListener("click", handleToggleLanguage);
 
-  // Lemon Squeezy Link
-  upgradeLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    const url = upgradeLink.getAttribute("href");
-    chrome.tabs.create({ url: url });
-  });
+  // Lemon Squeezy Monthly & Lifetime Links
+  if (upgradeMonthlyLink) {
+    upgradeMonthlyLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const url = upgradeMonthlyLink.getAttribute("href");
+      chrome.tabs.create({ url: url });
+    });
+  }
+  if (upgradeLifetimeLink) {
+    upgradeLifetimeLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const url = upgradeLifetimeLink.getAttribute("href");
+      chrome.tabs.create({ url: url });
+    });
+  }
+
+  // License key activation system click handler
+  if (licenseBtn) {
+    licenseBtn.addEventListener("click", () => {
+      const key = licenseInput.value.trim();
+      if (key.startsWith("MAIL-") && key.length >= 18) {
+        // Valid license key format
+        chrome.storage.local.set({ licenseKey: key, isPro: true }, () => {
+          chrome.storage.sync.set({ isPro: true }, () => {
+            // Update UI
+            updateProBadgeUI(true);
+            
+            // Hide upgrade container
+            upgradeContainer.classList.add("hidden");
+            
+            // Show success message
+            licenseMessage.className = "license-message success";
+            licenseMessage.innerText = translations[currentLanguage].licenseSuccess;
+            licenseMessage.classList.remove("hidden");
+            
+            // Clear input
+            licenseInput.value = "";
+          });
+        });
+      } else {
+        // Invalid license key format
+        licenseMessage.className = "license-message error";
+        licenseMessage.innerText = translations[currentLanguage].licenseError;
+        licenseMessage.classList.remove("hidden");
+      }
+    });
+  }
 });
 
 /**
@@ -649,9 +720,11 @@ function updateProBadgeUI(isPro) {
   if (isPro) {
     proBadge.className = "pro-badge pro-mode";
     proBadge.innerText = "Pro";
+    if (licenseContainer) licenseContainer.classList.add("hidden");
   } else {
     proBadge.className = "pro-badge free-mode";
     proBadge.innerText = "Free";
+    if (licenseContainer) licenseContainer.classList.remove("hidden");
   }
 }
 
@@ -694,7 +767,8 @@ function applyLanguage(lang) {
   riskScoreLabel.innerText = t.riskLabel;
   checklistHeading.innerText = t.checklistHeading;
   upgradeMessage.innerText = t.upgradeMsg;
-  upgradeLink.innerText = t.upgradeBtn;
+  if (licenseHeading) licenseHeading.innerText = t.licenseHeading;
+  if (licenseBtn) licenseBtn.innerText = t.licenseBtn;
   copyWarningBtn.querySelector("span").innerText = t.copyWarning;
 
   // Dashboard panel
