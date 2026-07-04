@@ -41,6 +41,10 @@ else:
 # Provide a configurable model name environment variable with the requested model as default
 CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
 
+# Lemon Squeezy API license validation key
+LEMONSQUEEZY_API_KEY = os.getenv("LEMONSQUEEZY_API_KEY")
+
+
 # Define request body schema using Pydantic
 class EmailAnalysisRequest(BaseModel):
     subject: str

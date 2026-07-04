@@ -147,6 +147,49 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     runAnalysis();
     return true; // Keep message channel open for async response
+  } else if (request.action === "validateLicense") {
+    const key = request.licenseKey || "";
+    
+    // Developer testing mode override
+    if (key === "MAIL-DEV-HARISH-2026") {
+      sendResponse({ success: true, message: "Developer mode activated" });
+      return false; // synchronous response
+    }
+    
+    // Lemon Squeezy API License Key validation
+    const validateLicenseKey = async () => {
+      try {
+        const response = await fetch("https://api.lemonsqueezy.com/v1/licenses/validate", {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({ license_key: key }).toString()
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.valid === true) {
+            sendResponse({ success: true });
+          } else {
+            sendResponse({ success: false, error: "Invalid license key." });
+          }
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          sendResponse({ 
+            success: false, 
+            error: errData.error || `Validation server responded with status: ${response.status}` 
+          });
+        }
+      } catch (err) {
+        console.error("License key validation failed:", err);
+        sendResponse({ success: false, error: "Could not connect to the license verification server." });
+      }
+    };
+    
+    validateLicenseKey();
+    return true; // keep channel open for async response
   }
 });
 

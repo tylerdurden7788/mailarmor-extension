@@ -271,24 +271,55 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (licenseBtn) {
     licenseBtn.addEventListener("click", () => {
       const key = licenseInput.value.trim();
-      if (key.startsWith("MAIL-") && key.length >= 18) {
-        // Valid license key format
+      
+      // Helper function to apply successful Pro activation
+      const activateProLocal = (successMsg) => {
         chrome.storage.local.set({ licenseKey: key, isPro: true }, () => {
           chrome.storage.sync.set({ isPro: true }, () => {
             // Update UI
             updateProBadgeUI(true);
             
-            // Hide upgrade container
-            upgradeContainer.classList.add("hidden");
+            // Unhide scan button & hide upgrade container
+            getScanCount((count) => {
+              checkUpgradeRequirement(count, true);
+            });
             
             // Show success message
             licenseMessage.className = "license-message success";
-            licenseMessage.innerText = translations[currentLanguage].licenseSuccess;
+            licenseMessage.innerText = successMsg || translations[currentLanguage].licenseSuccess;
             licenseMessage.classList.remove("hidden");
             
             // Clear input
             licenseInput.value = "";
           });
+        });
+      };
+
+      // 1. Developer testing mode override
+      if (key === "MAIL-DEV-HARISH-2026") {
+        activateProLocal("✅ Developer Mode Activated! Enjoy permanent Pro access.");
+        return;
+      }
+
+      // 2. Validate standard license format locally first
+      if (key.startsWith("MAIL-") && key.length >= 18) {
+        licenseMessage.className = "license-message";
+        licenseMessage.innerText = currentLanguage === "hi" ? "सत्यापित किया जा रहा है..." : "Validating key...";
+        licenseMessage.classList.remove("hidden");
+        
+        // Send message to background script for Lemon Squeezy API validation
+        chrome.runtime.sendMessage({
+          action: "validateLicense",
+          licenseKey: key
+        }, (response) => {
+          if (chrome.runtime.lastError || !response || !response.success) {
+            const errMsg = response?.error || chrome.runtime.lastError?.message || "Verification failed.";
+            licenseMessage.className = "license-message error";
+            licenseMessage.innerText = `❌ ${errMsg}`;
+            licenseMessage.classList.remove("hidden");
+          } else {
+            activateProLocal(translations[currentLanguage].licenseSuccess);
+          }
         });
       } else {
         // Invalid license key format
@@ -721,10 +752,12 @@ function updateProBadgeUI(isPro) {
     proBadge.className = "pro-badge pro-mode";
     proBadge.innerText = "Pro";
     if (licenseContainer) licenseContainer.classList.add("hidden");
+    if (scanCountText) scanCountText.classList.add("hidden");
   } else {
     proBadge.className = "pro-badge free-mode";
     proBadge.innerText = "Free";
     if (licenseContainer) licenseContainer.classList.remove("hidden");
+    if (scanCountText) scanCountText.classList.remove("hidden");
   }
 }
 
@@ -810,8 +843,9 @@ function updateScanCountStats(callback) {
  * Updates footer scan counter copy.
  */
 function updateScanFooter(count) {
+  const displayCount = Math.min(count, MAX_FREE_SCANS);
   scanCountText.innerText = translations[currentLanguage].freeScansUsed
-    .replace("{count}", count)
+    .replace("{count}", displayCount)
     .replace("{max}", MAX_FREE_SCANS);
 }
 
