@@ -12,6 +12,18 @@ RULE_REGISTRY = {
         "explanation": "Sender name includes a title resembling a known system or corporate role.",
         "recommendation": "Verify whether this display name belongs to the actual sender domain."
     },
+    "SND_003": {
+        "category": "SENDER",
+        "severity": "HIGH",
+        "explanation": "Free email provider (like Gmail or Outlook) is impersonating a registered organization.",
+        "recommendation": "Legitimate organizations do not send official correspondence from free personal accounts. Treat this email with caution."
+    },
+    "SND_004": {
+        "category": "SENDER",
+        "severity": "MEDIUM",
+        "explanation": "The email headers specify multiple inconsistent sender identities.",
+        "recommendation": "Confirm identity through official bookmarks. Inconsistent identities are an impersonation signal."
+    },
     
     # Domain Rules
     "DOM_001": {
@@ -25,6 +37,18 @@ RULE_REGISTRY = {
         "severity": "MEDIUM",
         "explanation": "The sender domain belongs to a high-risk suspicious TLD.",
         "recommendation": "Verify the authenticity of the message since trusted providers rarely use this TLD."
+    },
+    "DOM_003": {
+        "category": "DOMAIN",
+        "severity": "LOW",
+        "explanation": "The domain has an excessive number of subdomain nesting levels.",
+        "recommendation": "Be careful when clicking links on deeply nested subdomains, which are often used to hide the root host."
+    },
+    "DOM_004": {
+        "category": "DOMAIN",
+        "severity": "LOW",
+        "explanation": "The domain name formatting or structure appears anomalous.",
+        "recommendation": "Check the domain carefully. Malformed hostnames indicate suspicious origins."
     },
     
     # URL Rules
@@ -84,6 +108,12 @@ RULE_REGISTRY = {
         "category": "BRAND",
         "explanation": "Sender name references a prominent brand, but domain is unofficial.",
         "recommendation": "This is a brand spoofing signature. Access your account via official bookmarks instead.",
+        "severity": "CRITICAL"
+    },
+    "BRD_002": {
+        "category": "BRAND",
+        "explanation": "The sender claims affiliation with a department (like Billing or Security) of a trusted brand, but the domain is unofficial.",
+        "recommendation": "Verify payment requests using trusted channels or call support directly. Do not follow instructions in the email.",
         "severity": "CRITICAL"
     },
     
@@ -153,6 +183,20 @@ RULE_REGISTRY = {
         "explanation": "Punycode domain detected representing internationalized name.",
         "recommendation": "Punycode (xn--) can hide lookalike letters. Check details to confirm actual target.",
         "severity": "MEDIUM"
+    },
+    
+    # Header Consistency Rules
+    "HDR_001": {
+        "category": "HEADER_CONSISTENCY",
+        "severity": "MEDIUM",
+        "explanation": "Inconsistencies detected between sender-related headers (e.g. From vs Reply-To/Return-Path/Message-ID).",
+        "recommendation": "Avoid clicking links or replying. Multi-header discrepancies are common in spoofed mail."
+    },
+    "HDR_002": {
+        "category": "HEADER_CONSISTENCY",
+        "severity": "MEDIUM",
+        "explanation": "Sender domain does not match mail servers listed in the Received path.",
+        "recommendation": "Treat origins as unverified if the transport path doesn't align with the sender's claimed organization."
     },
     
     # Reputation Rules

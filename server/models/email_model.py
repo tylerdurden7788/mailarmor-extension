@@ -29,6 +29,7 @@ class ReceivedHop(BaseModel):
 
 class Email(BaseModel):
     # Envelope & Headers
+    subject: str = Field(default="", description="Value of the Subject header")
     from_header: str = Field(default="", description="Value of the From header")
     sender_header: str = Field(default="", description="Value of the Sender header")
     reply_to: str = Field(default="", description="Value of the Reply-To header")

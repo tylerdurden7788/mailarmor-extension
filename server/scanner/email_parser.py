@@ -218,6 +218,7 @@ class EmailParser:
         forms = [EmailForm(**f) for f in html_parser.forms]
         
         return Email(
+            subject=msg.get("Subject", ""),
             from_header=from_header,
             sender_header=sender_header,
             reply_to=reply_to,
@@ -303,6 +304,7 @@ class EmailParser:
             ))
 
         return Email(
+            subject=subject,
             from_header=sender_raw,
             sender_header="",
             reply_to=payload.get("reply_to", ""),
