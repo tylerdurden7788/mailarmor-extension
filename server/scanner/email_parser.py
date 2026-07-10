@@ -215,6 +215,15 @@ class EmailParser:
             html_parser.feed(body_html)
             
         urls = [Link(**l) for l in html_parser.links]
+        if not urls and body_text:
+            found_urls = re.findall(r'https?://[^\s<>"]+|www\.[^\s<>"]+', body_text)
+            for f_url in found_urls:
+                urls.append(Link(
+                    actual_url=f_url,
+                    display_text=f_url,
+                    is_button=False,
+                    has_mismatch=False
+                ))
         forms = [EmailForm(**f) for f in html_parser.forms]
         
         return Email(
@@ -289,6 +298,16 @@ class EmailParser:
                 is_button=l["is_button"],
                 has_mismatch=has_mismatch
             ))
+            
+        if not urls and body_raw:
+            found_urls = re.findall(r'https?://[^\s<>"]+|www\.[^\s<>"]+', body_raw)
+            for f_url in found_urls:
+                urls.append(Link(
+                    actual_url=f_url,
+                    display_text=f_url,
+                    is_button=False,
+                    has_mismatch=False
+                ))
             
         forms = [EmailForm(**f) for f in html_parser.forms]
         
