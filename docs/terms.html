@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms & Conditions | MailArmor</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --font-main: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      --bg-dark: #070a13;
+      --bg-card: rgba(18, 24, 38, 0.7);
+      --primary: #2563eb;
+      --primary-glow: rgba(37, 99, 235, 0.4);
+      --accent: #6366f1;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border: rgba(33, 44, 62, 0.6);
+      --gradient-primary: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
+      --gradient-dark: linear-gradient(180deg, #090d16 0%, #070a13 100%);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: var(--gradient-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      line-height: 1.7;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+    }
+
+    /* Glow blobs */
+    .glow-blob {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, var(--primary-glow) 0%, rgba(37,99,235,0) 70%);
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      z-index: 2;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      fill: var(--primary);
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .update-date {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    section {
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-bottom: 15px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .highlight {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      width: 100%;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      background: var(--gradient-primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-back:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px var(--primary-glow);
+      filter: brightness(1.1);
+    }
+
+    .contact-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .contact-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-blob"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo-container">
+        <svg class="logo-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 4L6 12V24C6 34 13.5 42.5 24 45C34.5 42.5 42 34 42 24V12L24 4Z" fill="#2563eb" fill-opacity="0.8"/>
+          <path d="M24 14L16 22H21V32H27V22H32L24 14Z" fill="#ffffff"/>
+        </svg>
+        <span class="brand-name">MailArmor</span>
+      </div>
+      <h1>Terms & Conditions</h1>
+      <p class="update-date">Last Updated: July 10, 2026</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>1. Acceptance of Terms</h2>
+        <p>By installing and using the MailArmor Chrome extension or accessing our services, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please uninstall the extension and discontinue use of our service immediately.</p>
+      </section>
+
+      <section>
+        <h2>2. Description of Service</h2>
+        <p>MailArmor provides inbox security tools to identify phishing attempts, analyze email sender details, perform domain age checks, flag suspicious redirecting links, and compile email analysis reports inside your browser client. The analysis is performed by transferring email metadata to our secure cloud server using Anthropic Claude.</p>
+      </section>
+
+      <section>
+        <h2>3. Free and Pro Tiers</h2>
+        <p>We offer two service levels for our users:</p>
+        <ul>
+          <li><span class="highlight">Free Shield:</span> Restricts active inbox security checks to a limit of 10 scans per lifetime/installation. Features include Hindi localization, standard sender validation, and basic attachment check.</li>
+          <li><span class="highlight">Pro Shield:</span> Unlocks unlimited inbox scans, access to domain age check, whitelisting, history logs of up to 50 scans, and exports (PDF, CSV, JSON reports).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>4. Payment and Refund Policy</h2>
+        <p>Pro subscriptions are purchased via authorized third-party checkout services (Lemon Squeezy, UPI etc.).</p>
+        <ul>
+          <li>Payments are processed securely under the terms of the merchant processor.</li>
+          <li><span class="highlight">Refund Policy:</span> We offer a simple and honest refund period. You may request a full refund within <span class="highlight">7 days</span> of purchase by contacting us. After 7 days, payments are non-refundable.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>5. User Responsibilities</h2>
+        <p>You agree to use MailArmor solely for personal or authorized business security scans. You must not attempt to reverse-engineer the extension, overload the analysis server, bypass free tier limits, or input malicious payloads. You are responsible for ensuring the confidentiality of your license key.</p>
+      </section>
+
+      <section>
+        <h2>6. Limitation of Liability</h2>
+        <p>MailArmor is a supportive assistant designed to flag common security hazards and anomalies. It does not replace independent security audits or cybersecurity practices. We do not guarantee 100% phishing detection accuracy. MailArmor is provided "as is", and we are not liable for any security breaches, data loss, or system vulnerabilities that occur while using the service.</p>
+      </section>
+
+      <section>
+        <h2>7. Changes to Service</h2>
+        <p>We reserve the right to refine features, adjust tier offerings, change scan limits, or modify API server configurations to improve service quality. Whenever material changes are introduced, we will update the version number and notify users via release changelogs or web updates.</p>
+      </section>
+
+      <section>
+        <h2>8. Contact Information</h2>
+        <p>If you have any questions, require license support, or would like to request a refund within 7 days, please get in touch with us at:</p>
+        <p>Email: <a href="mailto:mailarmor.app@gmail.com" class="contact-link">mailarmor.app@gmail.com</a></p>
+      </section>
+    </main>
+
+    <footer>
+      <a href="index.html" class="btn-back">Back to Home</a>
+    </footer>
+  </div>
+</body>
+</html>
