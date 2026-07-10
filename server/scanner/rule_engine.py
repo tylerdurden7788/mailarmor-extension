@@ -28,6 +28,17 @@ from analyzers.qr_analyzer import QRAnalyzer
 from analyzers.ocr_image_analyzer import OcrImageAnalyzer
 from analyzers.header_consistency_analyzer import HeaderConsistencyAnalyzer
 
+# HTML Analyzers & Parser
+from scanner.html_parser import StandardHTMLDOMParser
+from analyzers.dom_analyzer import DOMAnalyzer
+from analyzers.form_analyzer import FormAnalyzer
+from analyzers.css_analyzer import CSSAnalyzer
+from analyzers.javascript_analyzer import JavaScriptAnalyzer
+from analyzers.iframe_analyzer import IframeAnalyzer
+from analyzers.meta_analyzer import MetaAnalyzer
+from analyzers.resource_analyzer import ResourceAnalyzer
+from analyzers.ui_deception_analyzer import UIDeceptionAnalyzer
+
 # Register them into the plugin_manager on module import
 plugin_manager.register("SenderAnalyzer", SenderAnalyzer())
 plugin_manager.register("DomainAnalyzer", DomainAnalyzer())
@@ -42,6 +53,15 @@ plugin_manager.register("ReputationAnalyzer", ReputationAnalyzer())
 plugin_manager.register("QRAnalyzer", QRAnalyzer())
 plugin_manager.register("OcrImageAnalyzer", OcrImageAnalyzer())
 plugin_manager.register("HeaderConsistencyAnalyzer", HeaderConsistencyAnalyzer())
+
+plugin_manager.register("DOMAnalyzer", DOMAnalyzer())
+plugin_manager.register("FormAnalyzer", FormAnalyzer())
+plugin_manager.register("CSSAnalyzer", CSSAnalyzer())
+plugin_manager.register("JavaScriptAnalyzer", JavaScriptAnalyzer())
+plugin_manager.register("IframeAnalyzer", IframeAnalyzer())
+plugin_manager.register("MetaAnalyzer", MetaAnalyzer())
+plugin_manager.register("ResourceAnalyzer", ResourceAnalyzer())
+plugin_manager.register("UIDeceptionAnalyzer", UIDeceptionAnalyzer())
 
 # Shared global resolver instance for redirect caching
 redirect_resolver = URLRedirectResolver(max_depth=5, timeout_sec=1.5)
@@ -108,13 +128,23 @@ class RuleEngine:
             }
         )
         
+        # Construct HTMLContext using StandardHTMLDOMParser
+        html_context = StandardHTMLDOMParser(max_depth=32, max_nodes=1000).parse(email.body_html)
+        
         # 2. Asynchronous execution of registered analyzers
         analyzers = plugin_manager.get_analyzers()
         analyzer_names = plugin_manager.get_analyzer_names()
         
+        html_analyzers_set = {
+            "DOMAnalyzer", "FormAnalyzer", "CSSAnalyzer", "JavaScriptAnalyzer",
+            "IframeAnalyzer", "MetaAnalyzer", "ResourceAnalyzer", "UIDeceptionAnalyzer",
+            "HtmlAnalyzer"
+        }
+        
         tasks = []
         for name, analyzer in zip(analyzer_names, analyzers):
-            tasks.append(RuleEngine._run_single_analyzer(name, analyzer, email, url_context))
+            selected_ctx = html_context if name in html_analyzers_set else url_context
+            tasks.append(RuleEngine._run_single_analyzer(name, analyzer, email, selected_ctx))
             
         results = await asyncio.gather(*tasks)
         

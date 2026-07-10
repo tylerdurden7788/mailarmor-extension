@@ -228,6 +228,54 @@ RULE_REGISTRY = {
         "explanation": "HTML contains hidden CSS overlays, invisible text or zero-font elements.",
         "recommendation": "Attackers use hidden styling to bypass security keyword filters. Treat content with caution."
     },
+    "HTML_004": {
+        "category": "HTML",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Hidden iframe or clickjacking overlay detected.",
+        "recommendation": "Be careful when clicking. Invisible overlays can intercept actions and steal credentials."
+    },
+    "HTML_005": {
+        "category": "HTML",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Obfuscated or dynamically evaluated JavaScript detected.",
+        "recommendation": "Avoid interacting with interactive widgets. Obfuscation is used to hide exploits."
+    },
+    "HTML_006": {
+        "category": "HTML",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Remote script loaded from an untrusted or non-matching domain.",
+        "recommendation": "Treat interactive controls with care. External scripts can modify page behaviors dynamically."
+    },
+    "HTML_007": {
+        "category": "HTML",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Duplicate forms or malformed DOM structure detected.",
+        "recommendation": "Check forms carefully. Phishing templates often duplicate containers to overlay input prompts."
+    },
+    "HTML_008": {
+        "category": "HTML",
+        "severity": "CRITICAL",
+        "priority": 1,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Visual brand impersonation or secure lock icon abuse detected.",
+        "recommendation": "This email contains indicators of visual UI deception. Do not enter credentials."
+    },
+    "HTML_009": {
+        "category": "HTML",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Meta refresh tag or base URL tag override detected.",
+        "recommendation": "Do not allow the page to auto-redirect. Verify destination address manually."
+    },
     
     # Attachment Rules
     "ATT_001": {
