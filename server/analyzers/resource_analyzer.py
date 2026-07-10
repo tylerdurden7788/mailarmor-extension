@@ -24,20 +24,42 @@ class ResourceAnalyzer(BaseAnalyzer):
         sender_domain = extract_domain(email.from_header)
         untrusted_scripts = []
         tracking_pixels = []
-        data_uris_count = 0
+        data_uris = []
+        blob_urls = []
+        svgs = []
+        embedded_fonts = []
+        manifest_files = []
+        external_media = []
+        inline_images = []
         
-        # 1. Evaluate resources: scripts, style overlays, fonts, favicons
+        # 1. Evaluate resources: scripts, styles, fonts, favicons, etc.
         for res in resources:
-            src = res.src
+            src = res.src or ""
+            res_lower = src.lower()
+            
             if src.startswith("data:"):
-                data_uris_count += 1
+                data_uris.append(src)
+                if "image/" in src:
+                    inline_images.append(src)
                 continue
+                
+            if src.startswith("blob:"):
+                blob_urls.append(src)
+                continue
+                
+            if res_lower.endswith(".svg"):
+                svgs.append(src)
+            elif any(f in res_lower for f in [".woff", ".woff2", ".ttf", ".otf"]):
+                embedded_fonts.append(src)
+            elif "manifest" in res_lower or res_lower.endswith(".webmanifest"):
+                manifest_files.append(src)
+            elif any(m in res_lower for m in [".mp4", ".mp3", ".ogg", ".webm", ".avi"]):
+                external_media.append(src)
                 
             try:
                 parsed = urlparse(src)
                 if parsed.netloc:
                     res_domain = extract_domain(parsed.netloc)
-                    # Scripts loaded from external non-brand domains
                     if res.resource_type == "script" and res_domain != sender_domain:
                         if res_domain not in {"localhost", "127.0.0.1", "google.com", "microsoft.com", "github.com", "cloudflare.com"}:
                             untrusted_scripts.append(src)
@@ -46,30 +68,33 @@ class ResourceAnalyzer(BaseAnalyzer):
                 
         # 2. Check: Tracking pixels (1x1 images loaded externally)
         for img in images:
-            src = img.src
-            # Skip base64 images
+            src = img.src or ""
             if src.startswith("data:"):
                 continue
-                
-            # If image source points to different domain
             try:
                 parsed = urlparse(src)
                 if parsed.netloc:
                     img_domain = extract_domain(parsed.netloc)
                     if img_domain != sender_domain:
-                        # Common tracking parameter signatures
                         if any(p in src.lower() for p in ["track", "pixel", "open", "log", "stat"]):
                             tracking_pixels.append(src)
             except Exception:
                 pass
                 
         # Trigger remote script load warning (HTML_006)
-        if untrusted_scripts:
+        if untrusted_scripts or blob_urls or svgs or embedded_fonts or manifest_files or external_media or data_uris:
             evidence_list.append(create_evidence(
                 analyzer_name="ResourceAnalyzer",
                 rule_id="HTML_006",
                 technical_details={
                     "untrusted_scripts": untrusted_scripts,
+                    "blob_urls": blob_urls,
+                    "svgs": svgs,
+                    "embedded_fonts": embedded_fonts,
+                    "manifest_files": manifest_files,
+                    "external_media": external_media,
+                    "data_uris_count": len(data_uris),
+                    "inline_images_count": len(inline_images),
                     "metadata": metadata
                 },
                 confidence=0.70

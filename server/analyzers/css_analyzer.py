@@ -56,6 +56,50 @@ class CSSAnalyzer(BaseAnalyzer):
                         "dom_path": node.dom_path
                     })
                     
+                # 4. Refined CSS Visual Deception Techniques
+                if "pointer-events:none" in style:
+                    findings.append({
+                        "type": "pointer_events_none",
+                        "tag": node.tag,
+                        "style": node.attributes["style"],
+                        "dom_path": node.dom_path
+                    })
+                if "clip-path:" in style:
+                    findings.append({
+                        "type": "clip_path_mask",
+                        "tag": node.tag,
+                        "style": node.attributes["style"],
+                        "dom_path": node.dom_path
+                    })
+                if "transform:scale(0)" in style or "transform:translate(-" in style:
+                    findings.append({
+                        "type": "css_transform_hide",
+                        "tag": node.tag,
+                        "style": node.attributes["style"],
+                        "dom_path": node.dom_path
+                    })
+                if "filter:opacity(0)" in style or "filter:blur" in style:
+                    findings.append({
+                        "type": "css_filter_deception",
+                        "tag": node.tag,
+                        "style": node.attributes["style"],
+                        "dom_path": node.dom_path
+                    })
+                if ("position:fixed" in style or "position:absolute" in style) and ("z-index" in style or "width:100%" in style):
+                    findings.append({
+                        "type": "overlay_element",
+                        "tag": node.tag,
+                        "style": node.attributes["style"],
+                        "dom_path": node.dom_path
+                    })
+                if "margin-" in style and "-" in style: # check negative margins
+                    findings.append({
+                        "type": "negative_margin_overlay",
+                        "tag": node.tag,
+                        "style": node.attributes["style"],
+                        "dom_path": node.dom_path
+                    })
+                    
             for child in node.children:
                 inspect_node(child)
                 

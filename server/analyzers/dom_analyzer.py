@@ -47,14 +47,7 @@ class DOMAnalyzer(BaseAnalyzer):
             ))
             
         # 3. Check: Excessive DOM nesting depth (HTML_007)
-        max_depth = perf.get("max_depth_reached", 0)
-        # Traverse node tree to find actual max depth
-        def get_max_depth(node: DOMNode) -> int:
-            if not node.children:
-                return 1
-            return 1 + max(get_max_depth(child) for child in node.children)
-            
-        actual_depth = get_max_depth(root) if root else 0
+        actual_depth = context.dom_statistics.get("max_depth", 0)
         if actual_depth > 15:
             evidence_list.append(create_evidence(
                 analyzer_name="DOMAnalyzer",

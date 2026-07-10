@@ -62,6 +62,11 @@ class JavaScriptAnalyzer(BaseAnalyzer):
                 categories_triggered.append("networking")
                 details["dynamic_networking"] = True
                 
+            # 7. Browser Fingerprinting
+            if any(fp in content for fp in ["navigator.userAgent", "screen.width", "navigator.plugins", "getcontext(\"2d\")"]):
+                categories_triggered.append("fingerprinting")
+                details["browser_fingerprinting"] = True
+                
             if categories_triggered:
                 script_warnings.append({
                     "src": src,

@@ -59,10 +59,32 @@ class UIDeceptionAnalyzer(BaseAnalyzer):
         lock_emojis = ["🔒", "🔑", "🛡️", "⚠️"]
         lock_findings = []
         
+        # 3. Detect generic deception categories based on visual text cues
+        deception_categories = {
+            "Credential Harvesting": ["login", "signin", "enter password", "login credentials", "credential verification"],
+            "Identity Verification": ["verify identity", "verification required", "upload id", "verify ssn", "confirm identity"],
+            "Cloud Storage Login": ["dropbox", "onedrive", "google drive", "access document", "sharepoint file"],
+            "Invoice Payment": ["payment invoice", "billing payment", "unpaid invoice", "transaction receipt", "pay invoice"],
+            "Banking Login": ["banking security", "bank transfer", "account credit", "wire transfer", "overdraft notice"],
+            "Session Expired": ["session expired", "re-authenticate", "session timeout", "log back in"],
+            "Password Reset": ["password reset", "reset password", "change password link", "forgot password"],
+            "Multi-Factor Authentication": ["mfa code", "2fa authentication", "otp token", "authenticator prompt"],
+            "Security Warning": ["security warning", "alert: security", "threat detected", "account compromised"],
+            "CAPTCHA": ["click to verify", "verify you are human", "complete captcha", "solve puzzle"],
+            "Browser Warning": ["browser out of date", "update browser", "unsupported browser"],
+            "Software Update": ["critical update", "install patch", "software update", "system upgrade"]
+        }
+        
+        triggered_deceptions = []
+        for cat, keywords in deception_categories.items():
+            for kw in keywords:
+                if kw in email_text:
+                    triggered_deceptions.append(cat)
+                    break
+        
         def traverse_text(node: DOMNode):
             text = node.inner_text
             if any(le in text for le in lock_emojis):
-                # Flag visual deception indicators
                 if any(kw in text.lower() for kw in ["secure", "verify", "safety", "alert", "password"]):
                     lock_findings.append({
                         "tag": node.tag,
@@ -74,12 +96,13 @@ class UIDeceptionAnalyzer(BaseAnalyzer):
                 
         traverse_text(root)
         
-        if lock_findings:
+        if lock_findings or triggered_deceptions:
             evidence_list.append(create_evidence(
                 analyzer_name="UIDeceptionAnalyzer",
                 rule_id="HTML_008",
                 technical_details={
                     "deceptive_elements": lock_findings,
+                    "triggered_deception_categories": triggered_deceptions,
                     "metadata": metadata
                 },
                 confidence=0.75

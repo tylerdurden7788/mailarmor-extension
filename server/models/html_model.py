@@ -70,12 +70,16 @@ class DOMNode(BaseModel):
     dom_path: str
     inner_text: str = ""
 
-class DOMRelationshipGraph(BaseModel):
+class DocumentGraph(BaseModel):
     model_config = ConfigDict(frozen=True)
     
     parent_map: Dict[str, str] = Field(default_factory=dict) # node_id -> parent_node_id
     sibling_map: Dict[str, List[str]] = Field(default_factory=dict) # node_id -> list of sibling node_ids
     by_tag_map: Dict[str, List[str]] = Field(default_factory=dict) # tag -> list of node_ids
+    
+    # Advanced mappings representing general relationships (nodes, URLs, scripts, brands, evidence)
+    elements_map: Dict[str, Any] = Field(default_factory=dict)
+    brand_association_map: Dict[str, str] = Field(default_factory=dict)
 
 class HTMLContext(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -92,7 +96,23 @@ class HTMLContext(BaseModel):
     base_tags: List[Dict[str, str]] = Field(default_factory=list)
     iframes: List[HTMLIframe] = Field(default_factory=list)
     embedded_resources: List[HTMLResource] = Field(default_factory=list)
-    relationship_graph: Optional[DOMRelationshipGraph] = None
+    
+    # Refined relationship graph and warnings/provenance metadata
+    document_graph: Optional[DocumentGraph] = None
+    parser_backend: str = "StandardHTMLDOMParser"
+    parser_recovery_actions: List[str] = Field(default_factory=list)
+    extraction_metadata: Dict[str, Any] = Field(default_factory=dict)
+    canonicalization_warnings: List[str] = Field(default_factory=list)
+    ignored_nodes: List[str] = Field(default_factory=list)
+    traversal_cache: Dict[str, Any] = Field(default_factory=dict)
+    dom_statistics: Dict[str, Any] = Field(default_factory=dict)
+    
     parser_warnings: List[str] = Field(default_factory=list)
     normalization_metadata: Dict[str, Any] = Field(default_factory=dict)
     performance_metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+    # Placeholders for future rendering/vision integration
+    rendered_screenshot: Optional[str] = None
+    ocr_output: Optional[str] = None
+    visual_hash: Optional[str] = None
+    screenshot_metadata: Optional[Dict[str, Any]] = None
