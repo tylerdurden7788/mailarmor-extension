@@ -17,6 +17,7 @@ class EmailAttachment(BaseModel):
     filename: str
     content_type: str
     size_bytes: int
+    content_base64: Optional[str] = None
     is_dangerous: bool = False
     has_double_extension: bool = False
     is_executable: bool = False

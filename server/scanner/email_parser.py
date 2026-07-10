@@ -1,5 +1,6 @@
 import re
 import email
+import base64
 from email import policy
 from html.parser import HTMLParser
 from typing import Dict, Any, List
@@ -183,6 +184,7 @@ class EmailParser:
                     filename=filename,
                     content_type=part.get_content_type(),
                     size_bytes=size,
+                    content_base64=base64.b64encode(payload).decode("utf-8"),
                     has_double_extension=has_double_ext,
                     is_executable=is_executable
                 ))
@@ -318,6 +320,7 @@ class EmailParser:
                 filename=att.get("filename", ""),
                 content_type=att.get("content_type", "application/octet-stream"),
                 size_bytes=att.get("size_bytes", 0),
+                content_base64=att.get("content_base64"),
                 has_double_extension=len(re.findall(r'\.[a-zA-Z0-9]+', att.get("filename", ""))) > 1,
                 is_executable=any(att.get("filename", "").lower().endswith(ext) for ext in [".exe", ".bat", ".vbs", ".js"])
             ))

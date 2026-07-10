@@ -63,6 +63,39 @@ plugin_manager.register("MetaAnalyzer", MetaAnalyzer())
 plugin_manager.register("ResourceAnalyzer", ResourceAnalyzer())
 plugin_manager.register("UIDeceptionAnalyzer", UIDeceptionAnalyzer())
 
+# Attachment Analyzers & Components
+from models.attachment_model import AttachmentContext, ParsedAttachment
+from scanner.attachment_parser import AttachmentParser
+from scanner.attachment_feature_extractor import AttachmentFeatureExtractor
+
+from analyzers.mime_analyzer import MIMEAnalyzer
+from analyzers.file_signature_analyzer import FileSignatureAnalyzer
+from analyzers.extension_analyzer import ExtensionAnalyzer
+from analyzers.archive_analyzer import ArchiveAnalyzer
+from analyzers.office_document_analyzer import OfficeDocumentAnalyzer
+from analyzers.pdf_analyzer import PDFAnalyzer
+from analyzers.executable_analyzer import ExecutableAnalyzer
+from analyzers.script_analyzer import ScriptAnalyzer
+from analyzers.embedded_content_analyzer import EmbeddedContentAnalyzer
+from analyzers.image_analyzer import ImageAnalyzer
+from analyzers.ocr_analyzer import OCRAnalyzer
+from analyzers.malware_provider_analyzer import MalwareProviderAnalyzer
+from analyzers.sandbox_provider_analyzer import SandboxProviderAnalyzer
+
+plugin_manager.register("MIMEAnalyzer", MIMEAnalyzer())
+plugin_manager.register("FileSignatureAnalyzer", FileSignatureAnalyzer())
+plugin_manager.register("ExtensionAnalyzer", ExtensionAnalyzer())
+plugin_manager.register("ArchiveAnalyzer", ArchiveAnalyzer())
+plugin_manager.register("OfficeDocumentAnalyzer", OfficeDocumentAnalyzer())
+plugin_manager.register("PDFAnalyzer", PDFAnalyzer())
+plugin_manager.register("ExecutableAnalyzer", ExecutableAnalyzer())
+plugin_manager.register("ScriptAnalyzer", ScriptAnalyzer())
+plugin_manager.register("EmbeddedContentAnalyzer", EmbeddedContentAnalyzer())
+plugin_manager.register("ImageAnalyzer", ImageAnalyzer())
+plugin_manager.register("OCRAnalyzer", OCRAnalyzer())
+plugin_manager.register("MalwareProviderAnalyzer", MalwareProviderAnalyzer())
+plugin_manager.register("SandboxProviderAnalyzer", SandboxProviderAnalyzer())
+
 # Shared global resolver instance for redirect caching
 redirect_resolver = URLRedirectResolver(max_depth=5, timeout_sec=1.5)
 
@@ -131,6 +164,29 @@ class RuleEngine:
         # Construct HTMLContext using StandardHTMLDOMParser
         html_context = StandardHTMLDOMParser(max_depth=32, max_nodes=1000).parse(email.body_html)
         
+        # Construct AttachmentContext using AttachmentParser & Feature Extractor
+        parsed_attachments = []
+        extracted_features = {}
+        max_size = 10 * 1024 * 1024
+        archive_limits = {
+            "max_depth": 3,
+            "max_files": 100,
+            "max_uncompressed_bytes": 100 * 1024 * 1024
+        }
+        for att in email.attachments:
+            parsed_att = AttachmentParser.parse_attachment(att)
+            parsed_attachments.append(parsed_att)
+            if parsed_att.size_bytes <= max_size:
+                features = AttachmentFeatureExtractor.extract_features(att, parsed_att, archive_limits)
+                extracted_features[att.filename] = features
+                
+        attachment_context = AttachmentContext(
+            attachments=parsed_attachments,
+            extracted_features=extracted_features,
+            max_attachment_size=max_size,
+            archive_limits=archive_limits
+        )
+        
         # 2. Asynchronous execution of registered analyzers
         analyzers = plugin_manager.get_analyzers()
         analyzer_names = plugin_manager.get_analyzer_names()
@@ -141,9 +197,21 @@ class RuleEngine:
             "HtmlAnalyzer"
         }
         
+        attachment_analyzers_set = {
+            "AttachmentAnalyzer", "MIMEAnalyzer", "FileSignatureAnalyzer", "ExtensionAnalyzer",
+            "ArchiveAnalyzer", "OfficeDocumentAnalyzer", "PDFAnalyzer", "ExecutableAnalyzer",
+            "ScriptAnalyzer", "EmbeddedContentAnalyzer", "ImageAnalyzer", "OCRAnalyzer",
+            "MalwareProviderAnalyzer", "SandboxProviderAnalyzer", "QRAnalyzer", "OcrImageAnalyzer"
+        }
+        
         tasks = []
         for name, analyzer in zip(analyzer_names, analyzers):
-            selected_ctx = html_context if name in html_analyzers_set else url_context
+            if name in html_analyzers_set:
+                selected_ctx = html_context
+            elif name in attachment_analyzers_set:
+                selected_ctx = attachment_context
+            else:
+                selected_ctx = url_context
             tasks.append(RuleEngine._run_single_analyzer(name, analyzer, email, selected_ctx))
             
         results = await asyncio.gather(*tasks)

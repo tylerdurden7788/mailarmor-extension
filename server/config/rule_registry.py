@@ -310,6 +310,62 @@ RULE_REGISTRY = {
         "explanation": "Password-protected archive attachment found.",
         "recommendation": "Secure gateways cannot inspect locked archives. Verify authenticity directly with sender."
     },
+    "ATT_005": {
+        "category": "ATTACHMENT",
+        "severity": "CRITICAL",
+        "priority": 1,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Attachment has a file signature/magic byte mismatch.",
+        "recommendation": "Masked file types are a common delivery method for malware. Do not open."
+    },
+    "ATT_006": {
+        "category": "ATTACHMENT",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Suspicious active content or JavaScript found in PDF.",
+        "recommendation": "Phishing PDFs containing auto-launch events or scripts can compromise your device."
+    },
+    "ATT_007": {
+        "category": "ATTACHMENT",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Archive limit exceeded or zip bomb pattern identified.",
+        "recommendation": "Highly compressed or deeply nested archives can crash security scanners. Handle with caution."
+    },
+    "ATT_008": {
+        "category": "ATTACHMENT",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Office document contains macros or OLE/DDE links.",
+        "recommendation": "Do not enable macros or trust external templates when opening this document."
+    },
+    "ATT_009": {
+        "category": "ATTACHMENT",
+        "severity": "CRITICAL",
+        "priority": 1,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Dangerous script or system installer payload found.",
+        "recommendation": "Scripts and system installer packages (MSI, ISO) should not be opened via email."
+    },
+    "ATT_010": {
+        "category": "ATTACHMENT",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Embedded script or event handlers in SVG file.",
+        "recommendation": "SVG images can execute arbitrary javascript payloads when rendered. Verify sender."
+    },
+    "ATT_011": {
+        "category": "ATTACHMENT",
+        "severity": "CRITICAL",
+        "priority": 1,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Hidden embedded executable or binary stream found.",
+        "recommendation": "Files containing hidden sub-executables are extremely high-risk. Delete the file."
+    },
     
     # Unicode Rules
     "UNI_001": {
