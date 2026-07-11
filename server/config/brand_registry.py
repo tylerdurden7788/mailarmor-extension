@@ -4,7 +4,7 @@ BRAND_REGISTRY = {
         "display_names": ["PayPal", "PayPal Support", "PayPal Security"]
     },
     "lemonsqueezy": {
-        "official_domains": ["lemonsqueezy.com", "mailarmor.lemonsqueezy.com"],
+        "official_domains": ["lemonsqueezy.com", "mailarmour.lemonsqueezy.com"],
         "display_names": ["Lemon Squeezy", "LemonSqueezy"]
     },
     "google": {

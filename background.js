@@ -1,14 +1,14 @@
 /**
- * MailArmor Service Worker (Background Script)
+ * MailArmour Service Worker (Background Script)
  * Manifest V3 service worker running in the background.
  */
 
 // Log message when the background service worker starts up
-console.log("MailArmor background service started");
+console.log("MailArmour background service started");
 
 // Listen for installation event
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("MailArmor extension successfully installed");
+  console.log("MailArmour extension successfully installed");
 });
 
 // Listen for keyboard shortcuts
@@ -25,7 +25,7 @@ chrome.commands.onCommand.addListener((command) => {
 // Proxy API requests from content scripts / popup to the local FastAPI server and perform domain checks
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "analyzeEmail") {
-    const API_URL = "https://mailarmor-extension-production.up.railway.app/analyze";
+    const API_URL = "https://mailarmour-extension-production.up.railway.app/analyze";
     const emailData = request.emailData || {};
     
     // Extract domain from sender
@@ -106,7 +106,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           if (!res.ok) throw new Error("Could not connect to server. Try again.");
           return res.json();
         }).catch(err => {
-          throw new Error("MailArmor server is offline. Please ensure the backend is running at https://mailarmor-extension-production.up.railway.app");
+          throw new Error("MailArmour server is offline. Please ensure the backend is running at https://mailarmour-extension-production.up.railway.app");
         });
 
         const domainPromise = checkDomainAge(domain);

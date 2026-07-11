@@ -1,15 +1,15 @@
 /**
- * MailArmor Content Script
+ * MailArmour Content Script
  * Runs inside Gmail pages. Responsible for injecting the inline security badge,
  * performing auto-scans via background service worker, caching results,
  * highlighting deceptive link mismatches and scam keywords inside email bodies,
  * and intercepting clicks on suspicious links to show a warning modal.
  */
 
-// Inject MailArmor custom styles directly into Gmail page DOM
+// Inject MailArmour custom styles directly into Gmail page DOM
 const style = document.createElement("style");
 style.textContent = `
-  .mailarmor-badge-container {
+  .mailarmour-badge-container {
     display: inline-flex;
     align-items: center;
     margin-left: 12px;
@@ -17,7 +17,7 @@ style.textContent = `
     font-family: 'Inter', sans-serif;
     position: relative;
   }
-  .mailarmor-badge {
+  .mailarmour-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -31,65 +31,65 @@ style.textContent = `
     user-select: none;
     border: 1px solid transparent;
   }
-  .mailarmor-badge:hover {
+  .mailarmour-badge:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(0,0,0,0.15);
   }
-  .mailarmor-badge-loading {
+  .mailarmour-badge-loading {
     background-color: #f3f4f6;
     color: #374151;
     border-color: #d1d5db;
   }
-  .mailarmor-badge-scan {
+  .mailarmour-badge-scan {
     background-color: #e8f0fe;
     color: #1a73e8;
     border-color: #d2e3fc;
   }
-  .mailarmor-badge-scan:hover {
+  .mailarmour-badge-scan:hover {
     background-color: #d2e3fc;
   }
-  .mailarmor-badge-safe {
+  .mailarmour-badge-safe {
     background-color: #ecfdf5;
     color: #047857;
     border-color: #a7f3d0;
   }
-  .mailarmor-badge-suspicious {
+  .mailarmour-badge-suspicious {
     background-color: #fffbeb;
     color: #b45309;
     border-color: #fde68a;
   }
-  .mailarmor-badge-dangerous {
+  .mailarmour-badge-dangerous {
     background-color: #fef2f2;
     color: #b91c1c;
     border-color: #fecaca;
   }
-  .mailarmor-badge-limit {
+  .mailarmour-badge-limit {
     background-color: #f3f4f6;
     color: #4b5563;
     border-color: #e5e7eb;
   }
-  .mailarmor-badge-error {
+  .mailarmour-badge-error {
     background-color: #f3f4f6;
     color: #4b5563;
     border-color: #e5e7eb;
   }
 
   /* Spinner */
-  .mailarmor-spinner {
+  .mailarmour-spinner {
     width: 12px;
     height: 12px;
     border: 2px solid rgba(0, 0, 0, 0.1);
     border-top-color: #2563eb;
     border-radius: 50%;
-    animation: mailarmor-spin 0.8s linear infinite;
+    animation: mailarmour-spin 0.8s linear infinite;
     display: inline-block;
   }
-  @keyframes mailarmor-spin {
+  @keyframes mailarmour-spin {
     to { transform: rotate(360deg); }
   }
 
   /* Dropdown panel */
-  .mailarmor-dropdown {
+  .mailarmour-dropdown {
     position: absolute;
     top: 100%;
     left: 0;
@@ -107,10 +107,10 @@ style.textContent = `
     gap: 8px;
     text-align: left;
   }
-  .mailarmor-dropdown.show {
+  .mailarmour-dropdown.show {
     display: flex;
   }
-  .mailarmor-dropdown-header {
+  .mailarmour-dropdown-header {
     font-weight: 700;
     font-size: 13px;
     color: #2563eb;
@@ -120,54 +120,54 @@ style.textContent = `
     justify-content: space-between;
     align-items: center;
   }
-  .mailarmor-dropdown-close {
+  .mailarmour-dropdown-close {
     cursor: pointer;
     color: #9ca3af;
     font-size: 16px;
     font-weight: bold;
     line-height: 1;
   }
-  .mailarmor-dropdown-close:hover {
+  .mailarmour-dropdown-close:hover {
     color: #f3f4f6;
   }
-  .mailarmor-checklist {
+  .mailarmour-checklist {
     display: flex;
     flex-direction: column;
     gap: 8px;
     margin-top: 6px;
   }
-  .mailarmor-check-item {
+  .mailarmour-check-item {
     display: flex;
     align-items: flex-start;
     gap: 8px;
     font-size: 11px;
     line-height: 1.4;
   }
-  .mailarmor-check-icon {
+  .mailarmour-check-icon {
     font-size: 12px;
     margin-top: 1px;
   }
-  .mailarmor-check-details {
+  .mailarmour-check-details {
     display: flex;
     flex-direction: column;
   }
-  .mailarmor-check-title {
+  .mailarmour-check-title {
     font-weight: 600;
     color: #e5e7eb;
   }
-  .mailarmor-check-desc {
+  .mailarmour-check-desc {
     color: #9ca3af;
   }
 
   /* Suspicious link styling */
-  .mailarmor-suspicious-link {
+  .mailarmour-suspicious-link {
     border-bottom: 2px dashed #ef4444 !important;
     background-color: rgba(239, 68, 68, 0.1) !important;
     cursor: help !important;
     position: relative !important;
   }
-  .mailarmor-suspicious-link::after {
-    content: "⚠️ Deceptive link. Points to: " attr(data-mailarmor-dest);
+  .mailarmour-suspicious-link::after {
+    content: "⚠️ Deceptive link. Points to: " attr(data-mailarmour-dest);
     position: absolute;
     bottom: 100%;
     left: 50%;
@@ -185,13 +185,13 @@ style.textContent = `
     opacity: 0;
     transition: opacity 0.2s ease, visibility 0.2s ease;
   }
-  .mailarmor-suspicious-link:hover::after {
+  .mailarmour-suspicious-link:hover::after {
     visibility: visible;
     opacity: 1;
   }
 
   /* Scam Word Highlight style */
-  .mailarmor-scam-word {
+  .mailarmour-scam-word {
     border-bottom: 2px dashed #f59e0b !important;
     background-color: rgba(245, 158, 11, 0.15) !important;
     cursor: help !important;
@@ -265,7 +265,7 @@ function getTranslation(key, lang) {
       limitBadge: "🔒 Limit Reached",
       errorBadge: "⚠️ Error Scan",
       trustedBadge: "✅ Trusted Sender",
-      reportTitle: "MailArmor Security Report",
+      reportTitle: "MailArmour Security Report",
       verdictLabel: "Verdict",
       riskLabel: "Risk",
       reasonLabel: "Reason",
@@ -275,7 +275,7 @@ function getTranslation(key, lang) {
       content_check: "Content Verification",
       domain_check: "Domain Age Check",
       attachment_check: "Attachment Check",
-      limitDesc: "You've used all 10 free scans. Open the MailArmor extension popup in your browser toolbar to upgrade to Pro for unlimited scans 🔒",
+      limitDesc: "You've used all 10 free scans. Open the MailArmour extension popup in your browser toolbar to upgrade to Pro for unlimited scans 🔒",
       passedText: "Passed",
       failedText: "Warning"
     },
@@ -288,7 +288,7 @@ function getTranslation(key, lang) {
       limitBadge: "🔒 सीमा समाप्त",
       errorBadge: "⚠️ त्रुटि स्कैन",
       trustedBadge: "✅ विश्वसनीय प्रेषक",
-      reportTitle: "MailArmor सुरक्षा रिपोर्ट",
+      reportTitle: "MailArmour सुरक्षा रिपोर्ट",
       verdictLabel: "फ़ैसला",
       riskLabel: "जोखिम",
       reasonLabel: "कारण",
@@ -298,7 +298,7 @@ function getTranslation(key, lang) {
       content_check: "सामग्री सत्यापन",
       domain_check: "डोमेन आयु जांच",
       attachment_check: "अटैचमेंट जांच",
-      limitDesc: "आपने सभी 10 मुफ़्त स्कैन का उपयोग कर लिया है। असीमित स्कैन के लिए अपग्रेड करने के लिए ब्राउज़र टूलबार में MailArmor एक्सटेंशन खोलें 🔒",
+      limitDesc: "आपने सभी 10 मुफ़्त स्कैन का उपयोग कर लिया है। असीमित स्कैन के लिए अपग्रेड करने के लिए ब्राउज़र टूलबार में MailArmour एक्सटेंशन खोलें 🔒",
       passedText: "उत्तीर्ण",
       failedText: "चेतावनी"
     }
@@ -450,10 +450,10 @@ function updateScanStatsAndHistory(result, sender, subject) {
  * Injects a modern custom Gmail-like toast notification.
  */
 function showToast(message) {
-  let toast = document.getElementById("mailarmor-toast");
+  let toast = document.getElementById("mailarmour-toast");
   if (!toast) {
     toast = document.createElement("div");
-    toast.id = "mailarmor-toast";
+    toast.id = "mailarmour-toast";
     toast.style.cssText = `
       position: fixed;
       bottom: 30px;
@@ -502,7 +502,7 @@ function highlightScamKeywords(element, lang) {
   let node;
   while (node = walk.nextNode()) {
     const parentName = node.parentNode.nodeName.toUpperCase();
-    if (parentName !== 'SCRIPT' && parentName !== 'STYLE' && parentName !== 'NOSCRIPT' && parentName !== 'SPAN' && !node.parentNode.classList.contains('mailarmor-scam-word')) {
+    if (parentName !== 'SCRIPT' && parentName !== 'STYLE' && parentName !== 'NOSCRIPT' && parentName !== 'SPAN' && !node.parentNode.classList.contains('mailarmour-scam-word')) {
       textNodes.push(node);
     }
   }
@@ -515,10 +515,10 @@ function highlightScamKeywords(element, lang) {
       const regex = new RegExp(`\\b(${word})\\b`, 'gi');
       const hasWord = lang === 'hi' ? content.toLowerCase().includes(word) : regex.test(content);
       if (hasWord) {
-        const titleText = lang === 'hi' ? 'MailArmor चेतावनी: उच्च जोखिम वाला शब्द पाया गया।' : 'MailArmor Alert: High-risk keyword detected.';
+        const titleText = lang === 'hi' ? 'MailArmour चेतावनी: उच्च जोखिम वाला शब्द पाया गया।' : 'MailArmour Alert: High-risk keyword detected.';
         content = lang === 'hi'
-          ? content.replace(new RegExp(word, 'g'), `<span class="mailarmor-scam-word" title="${titleText}">${word}</span>`)
-          : content.replace(regex, `<span class="mailarmor-scam-word" title="${titleText}">$1</span>`);
+          ? content.replace(new RegExp(word, 'g'), `<span class="mailarmour-scam-word" title="${titleText}">${word}</span>`)
+          : content.replace(regex, `<span class="mailarmour-scam-word" title="${titleText}">$1</span>`);
         modified = true;
       }
     });
@@ -541,8 +541,8 @@ function setupLinkClickInterception(bodyEl, result) {
   if (!bodyEl || !result || result.verdict === "SAFE") return;
 
   bodyEl.querySelectorAll('a').forEach(link => {
-    if (link.dataset.mailarmorIntercepted) return;
-    link.dataset.mailarmorIntercepted = "true";
+    if (link.dataset.mailarmourIntercepted) return;
+    link.dataset.mailarmourIntercepted = "true";
 
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -558,7 +558,7 @@ function setupLinkClickInterception(bodyEl, result) {
  * Injects overlay warning block modal in the tab body.
  */
 function showLinkWarningModal(url, result) {
-  const existing = document.getElementById("mailarmor-warning-modal");
+  const existing = document.getElementById("mailarmour-warning-modal");
   if (existing) existing.remove();
 
   if (!isContextValid()) return;
@@ -567,7 +567,7 @@ function showLinkWarningModal(url, result) {
     const lang = data.lang || "en";
     
     const modal = document.createElement("div");
-    modal.id = "mailarmor-warning-modal";
+    modal.id = "mailarmour-warning-modal";
     modal.style.cssText = `
       position: fixed;
       top: 0;
@@ -598,7 +598,7 @@ function showLinkWarningModal(url, result) {
       gap: 16px;
     `;
 
-    const titleText = lang === "hi" ? "🚨 MailArmor सुरक्षा चेतावनी" : "🚨 MailArmor Security Alert";
+    const titleText = lang === "hi" ? "🚨 MailArmour सुरक्षा चेतावनी" : "🚨 MailArmour Security Alert";
     const header = document.createElement("div");
     header.style.cssText = "font-size: 18px; font-weight: 700; color: #ef4444;";
     header.innerHTML = `<span>${titleText}</span>`;
@@ -701,11 +701,11 @@ function handleNewEmailOpen(elements, emailKey) {
  * Triggers the actual scanning logic for the email when manually requested.
  */
 function performScan(elements, emailKey, lang) {
-  const badge = document.querySelector(".mailarmor-badge");
+  const badge = document.querySelector(".mailarmour-badge");
   if (!badge) return;
 
-  badge.className = "mailarmor-badge mailarmor-badge-loading";
-  badge.innerHTML = `<span class="mailarmor-spinner"></span> <span>${getTranslation("loadingBadge", lang)}</span>`;
+  badge.className = "mailarmour-badge mailarmour-badge-loading";
+  badge.innerHTML = `<span class="mailarmour-spinner"></span> <span>${getTranslation("loadingBadge", lang)}</span>`;
 
   if (!isContextValid()) return;
   chrome.storage.local.get(["cachedScans", "whitelist", "isPro"], (data) => {
@@ -819,24 +819,24 @@ function injectBadge(subjectEl, lang, onScanClick) {
   removeBadge();
 
   const container = document.createElement("div");
-  container.id = "mailarmor-inline-badge-container";
-  container.className = "mailarmor-badge-container";
+  container.id = "mailarmour-inline-badge-container";
+  container.className = "mailarmour-badge-container";
 
   const badge = document.createElement("div");
-  badge.className = "mailarmor-badge mailarmor-badge-scan";
+  badge.className = "mailarmour-badge mailarmour-badge-scan";
   badge.innerHTML = getTranslation("scanBadge", lang);
   container.appendChild(badge);
 
   const dropdown = document.createElement("div");
-  dropdown.className = "mailarmor-dropdown";
-  dropdown.id = "mailarmor-inline-dropdown";
+  dropdown.className = "mailarmour-dropdown";
+  dropdown.id = "mailarmour-inline-dropdown";
   container.appendChild(dropdown);
 
   badge.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (badge.classList.contains("mailarmor-badge-scan")) {
+    if (badge.classList.contains("mailarmour-badge-scan")) {
       onScanClick();
-    } else if (!badge.classList.contains("mailarmor-badge-loading")) {
+    } else if (!badge.classList.contains("mailarmour-badge-loading")) {
       dropdown.classList.toggle("show");
     }
   });
@@ -854,23 +854,23 @@ function injectBadge(subjectEl, lang, onScanClick) {
  * Updates the UI state of the badge and dropdown with detailed metrics.
  */
 function updateBadgeUI(result, lang) {
-  const badge = document.querySelector(".mailarmor-badge");
-  const dropdown = document.querySelector("#mailarmor-inline-dropdown");
+  const badge = document.querySelector(".mailarmour-badge");
+  const dropdown = document.querySelector("#mailarmour-inline-dropdown");
   if (!badge || !dropdown) return;
 
-  badge.className = "mailarmor-badge";
+  badge.className = "mailarmour-badge";
   
   if (result.isWhitelisted) {
-    badge.classList.add("mailarmor-badge-safe");
+    badge.classList.add("mailarmour-badge-safe");
     badge.innerHTML = getTranslation("trustedBadge", lang);
   } else if (result.verdict === "SAFE") {
-    badge.classList.add("mailarmor-badge-safe");
+    badge.classList.add("mailarmour-badge-safe");
     badge.innerHTML = getTranslation("safeBadge", lang);
   } else if (result.verdict === "SUSPICIOUS") {
-    badge.classList.add("mailarmor-badge-suspicious");
+    badge.classList.add("mailarmour-badge-suspicious");
     badge.innerHTML = getTranslation("suspiciousBadge", lang);
   } else if (result.verdict === "DANGEROUS") {
-    badge.classList.add("mailarmor-badge-dangerous");
+    badge.classList.add("mailarmour-badge-dangerous");
     badge.innerHTML = getTranslation("dangerousBadge", lang);
   }
 
@@ -890,11 +890,11 @@ function updateBadgeUI(result, lang) {
       const checkResult = checks[item.key];
       const checkIcon = checkResult.passed ? "🟢" : "🔴";
       checklistHtml += `
-        <div class="mailarmor-check-item">
-          <span class="mailarmor-check-icon">${checkIcon}</span>
-          <div class="mailarmor-check-details">
-            <span class="mailarmor-check-title">${escapeHtml(item.title)}</span>
-            <span class="mailarmor-check-desc">${escapeHtml(checkResult.detail)}</span>
+        <div class="mailarmour-check-item">
+          <span class="mailarmour-check-icon">${checkIcon}</span>
+          <div class="mailarmour-check-details">
+            <span class="mailarmour-check-title">${escapeHtml(item.title)}</span>
+            <span class="mailarmour-check-desc">${escapeHtml(checkResult.detail)}</span>
           </div>
         </div>
       `;
@@ -907,9 +907,9 @@ function updateBadgeUI(result, lang) {
   }
 
   dropdown.innerHTML = `
-    <div class="mailarmor-dropdown-header">
+    <div class="mailarmour-dropdown-header">
       <span>${escapeHtml(getTranslation("reportTitle", lang))}</span>
-      <span class="mailarmor-dropdown-close">&times;</span>
+      <span class="mailarmour-dropdown-close">&times;</span>
     </div>
     <div style="font-size: 12px; font-weight: 700; margin-top: 4px; display: flex; justify-content: space-between;">
       <span>${escapeHtml(getTranslation("verdictLabel", lang))}: ${escapeHtml(translatedVerdict)}</span>
@@ -918,67 +918,67 @@ function updateBadgeUI(result, lang) {
     <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-style: italic; line-height: 1.3;">
       "${escapeHtml(result.reason)}"
     </div>
-    <div class="mailarmor-checklist">
+    <div class="mailarmour-checklist">
       ${checklistHtml}
     </div>
   `;
 
-  dropdown.querySelector(".mailarmor-dropdown-close").addEventListener("click", (e) => {
+  dropdown.querySelector(".mailarmour-dropdown-close").addEventListener("click", (e) => {
     e.stopPropagation();
     dropdown.classList.remove("show");
   });
 }
 
 function updateBadgeToLimitState(lang) {
-  const badge = document.querySelector(".mailarmor-badge");
-  const dropdown = document.querySelector("#mailarmor-inline-dropdown");
+  const badge = document.querySelector(".mailarmour-badge");
+  const dropdown = document.querySelector("#mailarmour-inline-dropdown");
   if (!badge || !dropdown) return;
 
-  badge.className = "mailarmor-badge mailarmor-badge-limit";
+  badge.className = "mailarmour-badge mailarmour-badge-limit";
   badge.innerHTML = getTranslation("limitBadge", lang);
 
   dropdown.innerHTML = `
-    <div class="mailarmor-dropdown-header">
+    <div class="mailarmour-dropdown-header">
       <span>${getTranslation("reportTitle", lang)}</span>
-      <span class="mailarmor-dropdown-close">&times;</span>
+      <span class="mailarmour-dropdown-close">&times;</span>
     </div>
     <div style="font-size: 11px; color: #e5e7eb; margin-top: 6px; line-height: 1.4;">
       ${getTranslation("limitDesc", lang)}
     </div>
   `;
 
-  dropdown.querySelector(".mailarmor-dropdown-close").addEventListener("click", (e) => {
+  dropdown.querySelector(".mailarmour-dropdown-close").addEventListener("click", (e) => {
     e.stopPropagation();
     dropdown.classList.remove("show");
   });
 }
 
 function updateBadgeToErrorState(errorMsg, lang) {
-  const badge = document.querySelector(".mailarmor-badge");
-  const dropdown = document.querySelector("#mailarmor-inline-dropdown");
+  const badge = document.querySelector(".mailarmour-badge");
+  const dropdown = document.querySelector("#mailarmour-inline-dropdown");
   if (!badge || !dropdown) return;
 
-  badge.className = "mailarmor-badge mailarmor-badge-error";
+  badge.className = "mailarmour-badge mailarmour-badge-error";
   badge.innerHTML = getTranslation("errorBadge", lang);
 
   dropdown.innerHTML = `
-    <div class="mailarmor-dropdown-header">
+    <div class="mailarmour-dropdown-header">
       <span>${escapeHtml(getTranslation("reportTitle", lang))}</span>
-      <span class="mailarmor-dropdown-close">&times;</span>
+      <span class="mailarmour-dropdown-close">&times;</span>
     </div>
     <div style="font-size: 11px; color: #fca5a5; margin-top: 6px; line-height: 1.4;">
       ${escapeHtml(errorMsg)}
     </div>
   `;
 
-  dropdown.querySelector(".mailarmor-dropdown-close").addEventListener("click", (e) => {
+  dropdown.querySelector(".mailarmour-dropdown-close").addEventListener("click", (e) => {
     e.stopPropagation();
     dropdown.classList.remove("show");
   });
 }
 
 function removeBadge() {
-  const badge = document.getElementById("mailarmor-inline-badge-container");
+  const badge = document.getElementById("mailarmour-inline-badge-container");
   if (badge) badge.remove();
 }
 
@@ -990,7 +990,7 @@ function highlightSuspiciousLinks(bodyEl) {
   const links = bodyEl.querySelectorAll("a");
 
   links.forEach(link => {
-    if (link.classList.contains("mailarmor-suspicious-link")) return;
+    if (link.classList.contains("mailarmour-suspicious-link")) return;
 
     const href = link.getAttribute("href");
     if (!href) return;
@@ -1003,8 +1003,8 @@ function highlightSuspiciousLinks(bodyEl) {
       const hrefDomain = getDomainFromUrl(href);
 
       if (textDomain && hrefDomain && textDomain !== hrefDomain) {
-        link.classList.add("mailarmor-suspicious-link");
-        link.setAttribute("data-mailarmor-dest", hrefDomain);
+        link.classList.add("mailarmour-suspicious-link");
+        link.setAttribute("data-mailarmour-dest", hrefDomain);
       }
     }
   });
@@ -1045,7 +1045,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
       }
     } catch (err) {
-      console.error("MailArmor getEmailContent listener error:", err);
+      console.error("MailArmour getEmailContent listener error:", err);
       sendResponse({ error: "Failed to extract email contents: " + err.message });
     }
   } else if (request.action === "shortcutTriggered") {
@@ -1053,7 +1053,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.storage.local.get("lang", (data) => {
       if (!isContextValid()) return;
       const lang = data.lang || "en";
-      const toastMsg = lang === "hi" ? "MailArmor: स्कैनिंग..." : "MailArmor: Scanning...";
+      const toastMsg = lang === "hi" ? "MailArmour: स्कैनिंग..." : "MailArmour: Scanning...";
       showToast(toastMsg);
 
       const elements = findGmailElements();
@@ -1074,10 +1074,10 @@ setInterval(checkEmailOpened, 1000);
 // Global click listener to dismiss the inline badge dropdown contextually (resolves event listener accrual memory leak)
 document.addEventListener("click", () => {
   if (!isContextValid()) return;
-  const dropdown = document.getElementById("mailarmor-inline-dropdown");
+  const dropdown = document.getElementById("mailarmour-inline-dropdown");
   if (dropdown) {
     dropdown.classList.remove("show");
   }
 });
 
-console.log("MailArmor content script listener loaded successfully");
+console.log("MailArmour content script listener loaded successfully");

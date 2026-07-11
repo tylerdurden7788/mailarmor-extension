@@ -1,5 +1,5 @@
 /**
- * MailArmor Popup Script
+ * MailArmour Popup Script
  * Coordinates scanning logic, shared storage, UI updates, and API communications via background proxy.
  * Implements Hindi translations, Pro simulator, whitelisting, history, stats, and PDF reports.
  */
@@ -20,7 +20,7 @@ const translations = {
     scanningBtn: "Analyzing...",
     trustSender: "✅ Trust Sender",
     untrustSender: "❌ Untrust Sender",
-    copyWarning: "📋 MailArmor Alert",
+    copyWarning: "📋 MailArmour Alert",
     copied: "Copied!",
     upgradeBtn: "Upgrade — $5/month",
     neutralStatus: "Click Scan to analyze the current email",
@@ -82,7 +82,7 @@ const translations = {
     scanningBtn: "विश्लेषण हो रहा है...",
     trustSender: "✅ प्रेषक पर भरोसा करें",
     untrustSender: "❌ भरोसा हटाएं",
-    copyWarning: "📋 MailArmor चेतावनी",
+    copyWarning: "📋 MailArmour चेतावनी",
     copied: "कॉपी हो गया!",
     upgradeBtn: "अपग्रेड करें — $5/माह",
     neutralStatus: "वर्तमान ईमेल का विश्लेषण करने के लिए स्कैन पर क्लिक करें",
@@ -698,9 +698,9 @@ function handleCopyWarning() {
 
   let text;
   if (currentLanguage === "hi") {
-    text = `⚠️ MailArmor चेतावनी: ${currentEmailData.sender} से प्राप्त इस ईमेल को ${currentVerdictData.score}/100 फ़िशिंग संभावना के साथ ${verdict} के रूप में चिह्नित किया गया है।`;
+    text = `⚠️ MailArmour चेतावनी: ${currentEmailData.sender} से प्राप्त इस ईमेल को ${currentVerdictData.score}/100 फ़िशिंग संभावना के साथ ${verdict} के रूप में चिह्नित किया गया है।`;
   } else {
-    text = `⚠️ MailArmor Alert: This email from ${currentEmailData.sender} was flagged as ${verdict} with ${currentVerdictData.score}/100 phishing probability. Do not click any links or download attachments. Stay safe — MailArmor`;
+    text = `⚠️ MailArmour Alert: This email from ${currentEmailData.sender} was flagged as ${verdict} with ${currentVerdictData.score}/100 phishing probability. Do not click any links or download attachments. Stay safe — MailArmour`;
   }
 
   navigator.clipboard.writeText(text).then(() => {
@@ -979,7 +979,7 @@ async function handleScan() {
     });
 
   } catch (err) {
-      console.error("MailArmor scan failed:", err);
+      console.error("MailArmour scan failed:", err);
       showError(err.message || "Could not connect to server. Try again.");
       resetToNeutralState();
       setLoadingState(false);
@@ -1236,7 +1236,7 @@ function handleExportCsv() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `mailarmor-audit-history-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `mailarmour-audit-history-${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1259,7 +1259,7 @@ function handleExportJson() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `mailarmor-audit-history-${new Date().toISOString().split('T')[0]}.json`);
+    link.setAttribute("download", `mailarmour-audit-history-${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

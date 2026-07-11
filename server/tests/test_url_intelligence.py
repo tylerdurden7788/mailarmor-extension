@@ -40,11 +40,11 @@ class TestURLIntelligence(unittest.TestCase):
 
     @patch('utils.url_resolver.URLRedirectResolver._trace_redirects_sync')
     def test_scenario_3_github_urls(self, mock_trace):
-        mock_trace.return_value = ["https://github.com/tylerdurden7788/mailarmor-extension"]
+        mock_trace.return_value = ["https://github.com/tylerdurden7788/mailarmour-extension"]
         payload = {
             "subject": "Pull Request",
             "sender": "dev@github.com",
-            "body": "Check PR: https://github.com/tylerdurden7788/mailarmor-extension"
+            "body": "Check PR: https://github.com/tylerdurden7788/mailarmour-extension"
         }
         email = EmailParser.parse_api_payload(payload)
         report = self.run_async(RuleEngine.run_analysis(email))
