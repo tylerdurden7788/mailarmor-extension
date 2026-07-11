@@ -403,14 +403,214 @@ RULE_REGISTRY = {
         "recommendation": "Treat origins as unverified if the transport path doesn't align with the sender's claimed organization."
     },
     
-    # Reputation Rules
-    "REP_001": {
-        "category": "REPUTATION",
+    # Semantic Content & Social Engineering Rules
+    "SEM_001": {
+        "category": "SEMANTIC",
+        "severity": "INFO",
+        "priority": 5,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Primary sender intent classified.",
+        "recommendation": "Objective semantic intent telemetry logged."
+    },
+    "SEM_002": {
+        "category": "SEMANTIC",
+        "severity": "INFO",
+        "priority": 5,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Expected victim action identified.",
+        "recommendation": "Victim response behavior telemetry logged."
+    },
+    "SEM_003": {
+        "category": "SEMANTIC",
+        "severity": "INFO",
+        "priority": 5,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Social engineering manipulation technique classified.",
+        "recommendation": "Psychological persuasion vector telemetry logged."
+    },
+    "SEM_004": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Credential Harvesting pretext detected.",
+        "recommendation": "Be extremely cautious if prompted to log in or input passwords; verify URLs independently."
+    },
+    "SEM_005": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Business Email Compromise (BEC) pretext detected.",
+        "recommendation": "Urgent internal transactions or policy changes should be verified out-of-band."
+    },
+    "SEM_006": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Invoice Fraud pretext detected.",
+        "recommendation": "Verify outstanding balances, purchase orders, or account numbers directly with known vendors."
+    },
+    "SEM_007": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Payment Diversion pretext detected.",
+        "recommendation": "Do not update bank routing numbers or direct deposits based on email instructions without verbal verification."
+    },
+    "SEM_008": {
+        "category": "SEMANTIC",
         "severity": "CRITICAL",
         "priority": 1,
         "lifecycle_status": "PRODUCTION",
-        "explanation": "Domain listed as malicious in reputation lookup databases.",
-        "recommendation": "Do not open any links or provide information. The host has a known bad reputation."
+        "explanation": "CEO Impersonation (CEO Fraud) pretext detected.",
+        "recommendation": "Verify high-priority executive directives verbally or via separate official channels."
+    },
+    "SEM_009": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Payroll Fraud pretext detected.",
+        "recommendation": "Direct deposit change requests from employees must go through official HR/accounting procedures."
+    },
+    "SEM_010": {
+        "category": "SEMANTIC",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Account Takeover pretext detected.",
+        "recommendation": "Do not follow instructions to unlock accounts or input MFA codes from unexpected notification alerts."
+    },
+    "SEM_011": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "OAuth Consent Phishing pretext detected.",
+        "recommendation": "Do not authorize unfamiliar applications to read your inbox or access corporate files."
+    },
+    "SEM_012": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "MFA Harvesting pretext detected.",
+        "recommendation": "Never share OTP passcodes, verification codes, or approve push codes requested via email."
+    },
+    "SEM_013": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "QR Code Phishing pretext detected.",
+        "recommendation": "Do not scan QR codes embedded in unexpected emails; they bypass corporate link filters."
+    },
+    "SEM_014": {
+        "category": "SEMANTIC",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Technical Support Scam pretext detected.",
+        "recommendation": "Ignore claims of virus infections or remote access demands; consult your official IT Helpdesk."
+    },
+    "SEM_015": {
+        "category": "SEMANTIC",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Package Delivery Scam pretext detected.",
+        "recommendation": "Track shipments only on the official carrier website using original tracking numbers."
+    },
+    "SEM_016": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Banking Scam pretext detected.",
+        "recommendation": "Do not input credentials or verify transactions using links sent in bank security notifications."
+    },
+    "SEM_017": {
+        "category": "SEMANTIC",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Investment Scam pretext detected.",
+        "recommendation": "Be skeptical of high-return investment schemes or urgent trading tips received unsolicited."
+    },
+    "SEM_018": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Cryptocurrency Scam pretext detected.",
+        "recommendation": "Do not send digital assets to wallet addresses or disclose backup recovery phrases."
+    },
+    "SEM_019": {
+        "category": "SEMANTIC",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Romance Scam pretext detected.",
+        "recommendation": "Exercise caution when online acquaintances request money transfers or financial details."
+    },
+    "SEM_020": {
+        "category": "SEMANTIC",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Job Scam pretext detected.",
+        "recommendation": "Avoid job offers requiring checks to be deposited or initial fees paid."
+    },
+    "SEM_021": {
+        "category": "SEMANTIC",
+        "severity": "LOW",
+        "priority": 4,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Charity Scam pretext detected.",
+        "recommendation": "Donate only through verified official channels rather than direct email links."
+    },
+    "SEM_022": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Tax/Government Scam pretext detected.",
+        "recommendation": "Official agencies never demand immediate card payments or threaten arrest via email."
+    },
+    "SEM_023": {
+        "category": "SEMANTIC",
+        "severity": "MEDIUM",
+        "priority": 3,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Refund Scam pretext detected.",
+        "recommendation": "Overcharge claims requiring bank log-ins are scams. Verify with vendor separately."
+    },
+    "SEM_024": {
+        "category": "SEMANTIC",
+        "severity": "LOW",
+        "priority": 4,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Giveaway/Lottery Scam pretext detected.",
+        "recommendation": "Unsolicited notices claiming you won a lottery or free gift card should be deleted."
+    },
+    "SEM_025": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Blackmail/Extortion pretext detected.",
+        "recommendation": "Webcam threats demanding payments are spam extortion attempts; ignore and delete."
+    },
+    "SEM_026": {
+        "category": "SEMANTIC",
+        "severity": "HIGH",
+        "priority": 2,
+        "lifecycle_status": "PRODUCTION",
+        "explanation": "Brand Abuse display name mismatch pretext detected.",
+        "recommendation": "Verify displaying brand names against the actual sending domain address."
     },
     
     # Fallback Rules

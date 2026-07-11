@@ -96,6 +96,64 @@ plugin_manager.register("OCRAnalyzer", OCRAnalyzer())
 plugin_manager.register("MalwareProviderAnalyzer", MalwareProviderAnalyzer())
 plugin_manager.register("SandboxProviderAnalyzer", SandboxProviderAnalyzer())
 
+# Semantic Content Analyzers
+from models.semantic_model import SemanticContext
+from scanner.semantic_feature_extractor import SemanticFeatureExtractor
+
+from analyzers.intent_analyzer import IntentAnalyzer
+from analyzers.victim_action_analyzer import VictimActionAnalyzer
+from analyzers.social_engineering_analyzer import SocialEngineeringAnalyzer
+from analyzers.credential_harvesting_analyzer import CredentialHarvestingAnalyzer
+from analyzers.business_email_compromise_analyzer import BusinessEmailCompromiseAnalyzer
+from analyzers.invoice_fraud_analyzer import InvoiceFraudAnalyzer
+from analyzers.payment_diversion_analyzer import PaymentDiversionAnalyzer
+from analyzers.ceo_fraud_analyzer import CEOFraudAnalyzer
+from analyzers.payroll_fraud_analyzer import PayrollFraudAnalyzer
+from analyzers.account_takeover_analyzer import AccountTakeoverAnalyzer
+from analyzers.oauth_consent_analyzer import OAuthConsentAnalyzer
+from analyzers.mfa_harvesting_analyzer import MFAHarvestingAnalyzer
+from analyzers.qr_phishing_analyzer import QRPhishingAnalyzer
+from analyzers.technical_support_scam_analyzer import TechnicalSupportScamAnalyzer
+from analyzers.delivery_scam_analyzer import DeliveryScamAnalyzer
+from analyzers.banking_scam_analyzer import BankingScamAnalyzer
+from analyzers.investment_scam_analyzer import InvestmentScamAnalyzer
+from analyzers.cryptocurrency_scam_analyzer import CryptocurrencyScamAnalyzer
+from analyzers.romance_scam_analyzer import RomanceScamAnalyzer
+from analyzers.job_scam_analyzer import JobScamAnalyzer
+from analyzers.charity_scam_analyzer import CharityScamAnalyzer
+from analyzers.tax_scam_analyzer import TaxScamAnalyzer
+from analyzers.refund_scam_analyzer import RefundScamAnalyzer
+from analyzers.giveaway_lottery_analyzer import GiveawayLotteryAnalyzer
+from analyzers.blackmail_extortion_analyzer import BlackmailExtortionAnalyzer
+from analyzers.brand_abuse_analyzer import BrandAbuseAnalyzer
+
+plugin_manager.register("IntentAnalyzer", IntentAnalyzer())
+plugin_manager.register("VictimActionAnalyzer", VictimActionAnalyzer())
+plugin_manager.register("SocialEngineeringAnalyzer", SocialEngineeringAnalyzer())
+plugin_manager.register("CredentialHarvestingAnalyzer", CredentialHarvestingAnalyzer())
+plugin_manager.register("BusinessEmailCompromiseAnalyzer", BusinessEmailCompromiseAnalyzer())
+plugin_manager.register("InvoiceFraudAnalyzer", InvoiceFraudAnalyzer())
+plugin_manager.register("PaymentDiversionAnalyzer", PaymentDiversionAnalyzer())
+plugin_manager.register("CEOFraudAnalyzer", CEOFraudAnalyzer())
+plugin_manager.register("PayrollFraudAnalyzer", PayrollFraudAnalyzer())
+plugin_manager.register("AccountTakeoverAnalyzer", AccountTakeoverAnalyzer())
+plugin_manager.register("OAuthConsentAnalyzer", OAuthConsentAnalyzer())
+plugin_manager.register("MFAHarvestingAnalyzer", MFAHarvestingAnalyzer())
+plugin_manager.register("QRPhishingAnalyzer", QRPhishingAnalyzer())
+plugin_manager.register("TechnicalSupportScamAnalyzer", TechnicalSupportScamAnalyzer())
+plugin_manager.register("DeliveryScamAnalyzer", DeliveryScamAnalyzer())
+plugin_manager.register("BankingScamAnalyzer", BankingScamAnalyzer())
+plugin_manager.register("InvestmentScamAnalyzer", InvestmentScamAnalyzer())
+plugin_manager.register("CryptocurrencyScamAnalyzer", CryptocurrencyScamAnalyzer())
+plugin_manager.register("RomanceScamAnalyzer", RomanceScamAnalyzer())
+plugin_manager.register("JobScamAnalyzer", JobScamAnalyzer())
+plugin_manager.register("CharityScamAnalyzer", CharityScamAnalyzer())
+plugin_manager.register("TaxScamAnalyzer", TaxScamAnalyzer())
+plugin_manager.register("RefundScamAnalyzer", RefundScamAnalyzer())
+plugin_manager.register("GiveawayLotteryAnalyzer", GiveawayLotteryAnalyzer())
+plugin_manager.register("BlackmailExtortionAnalyzer", BlackmailExtortionAnalyzer())
+plugin_manager.register("BrandAbuseAnalyzer", BrandAbuseAnalyzer())
+
 # Shared global resolver instance for redirect caching
 redirect_resolver = URLRedirectResolver(max_depth=5, timeout_sec=1.5)
 
@@ -187,6 +245,9 @@ class RuleEngine:
             archive_limits=archive_limits
         )
         
+        # Construct SemanticContext
+        semantic_context = SemanticFeatureExtractor.extract_features(email.body_text, email.body_html)
+        
         # 2. Asynchronous execution of registered analyzers
         analyzers = plugin_manager.get_analyzers()
         analyzer_names = plugin_manager.get_analyzer_names()
@@ -204,12 +265,24 @@ class RuleEngine:
             "MalwareProviderAnalyzer", "SandboxProviderAnalyzer", "QRAnalyzer", "OcrImageAnalyzer"
         }
         
+        semantic_analyzers_set = {
+            "IntentAnalyzer", "VictimActionAnalyzer", "SocialEngineeringAnalyzer", "CredentialHarvestingAnalyzer",
+            "BusinessEmailCompromiseAnalyzer", "InvoiceFraudAnalyzer", "PaymentDiversionAnalyzer", "CEOFraudAnalyzer",
+            "PayrollFraudAnalyzer", "AccountTakeoverAnalyzer", "OAuthConsentAnalyzer", "MFAHarvestingAnalyzer",
+            "QRPhishingAnalyzer", "TechnicalSupportScamAnalyzer", "DeliveryScamAnalyzer", "BankingScamAnalyzer",
+            "InvestmentScamAnalyzer", "CryptocurrencyScamAnalyzer", "RomanceScamAnalyzer", "JobScamAnalyzer",
+            "CharityScamAnalyzer", "TaxScamAnalyzer", "RefundScamAnalyzer", "GiveawayLotteryAnalyzer",
+            "BlackmailExtortionAnalyzer", "BrandAbuseAnalyzer"
+        }
+        
         tasks = []
         for name, analyzer in zip(analyzer_names, analyzers):
             if name in html_analyzers_set:
                 selected_ctx = html_context
             elif name in attachment_analyzers_set:
                 selected_ctx = attachment_context
+            elif name in semantic_analyzers_set:
+                selected_ctx = semantic_context
             else:
                 selected_ctx = url_context
             tasks.append(RuleEngine._run_single_analyzer(name, analyzer, email, selected_ctx))
