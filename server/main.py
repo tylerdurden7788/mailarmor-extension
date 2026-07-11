@@ -36,6 +36,14 @@ app.add_middleware(
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 LEMONSQUEEZY_API_KEY = os.getenv("LEMONSQUEEZY_API_KEY")
 
+anthropic_client = None
+if ANTHROPIC_API_KEY:
+    try:
+        import anthropic
+        anthropic_client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+    except Exception as e:
+        print(f"Failed to initialize Anthropic client: {e}")
+
 class EmailAnalysisRequest(BaseModel):
     subject: str
     sender: str
@@ -60,17 +68,15 @@ async def analyze_email(payload: EmailAnalysisRequest):
         # 2. Rule Engine run (asynchronous parallel checks)
         report = await RuleEngine.run_analysis(email_obj)
         
-        # 3. Precedence-based decision verification
-        verdict = DecisionEngine.reconcile(report)
+        # 3. Decision Engine run
+        from decision.decision_engine import DecisionEngine as NewDecisionEngine
+        decision_model = await NewDecisionEngine.process_report(report, anthropic_client=anthropic_client)
+        verdict = decision_model.verdict
         
         # Generate compatible legacy values for extension backward-compatibility
-        score = 8 if verdict == "SAFE" else (55 if verdict == "SUSPICIOUS" else 92)
+        score = int(decision_model.confidence * 100)
         
-        reason = (
-            "Phishing threat detected by rule engine." if verdict == "DANGEROUS" 
-            else ("Anomalous items found." if verdict == "SUSPICIOUS" 
-            else "No security threats identified.")
-        )
+        reason = decision_model.user_explanation
         
         return EmailAnalysisResponse(
             report=report,
