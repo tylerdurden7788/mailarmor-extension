@@ -47,20 +47,15 @@ class DecisionEngine:
         # 6. RISK_ASSESSED state transition
         model = RiskEngine.assess(model)
         
-        # 7. CLAUDE_ANALYZED (Context build & invoke)
-        claude_response = None
-        if anthropic_client:
-            try:
-                claude_response = await DecisionEngine._invoke_claude(model, anthropic_client)
-            except Exception as e:
-                logger.warning(f"Claude reasoning failed or timed out: {e}. Falling back to local rules.")
-                model = model.model_copy(update={
-                    "decision_trace": model.decision_trace + [f"WARNING: Claude analysis failed: {e}. Reverting to local engine."]
-                })
-        else:
-            model = model.model_copy(update={
-                "decision_trace": model.decision_trace + ["INFO: Claude client not configured. Executing local rules only."]
-            })
+        # 7. CLAUDE_ANALYZED (Context build & invoke via central orchestrator)
+        from ai.orchestrator import AIOrchestrator
+        orchestrator = AIOrchestrator(anthropic_client)
+        ai_response, ai_traces = await orchestrator.analyze_decision_model(model)
+        
+        model = model.model_copy(update={
+            "decision_trace": model.decision_trace + ai_traces
+        })
+        claude_response = ai_response.parsed_json
             
         # 8. VERDICT_FUSED state transition
         model = VerdictFusion.fuse(model, claude_response)
@@ -84,27 +79,3 @@ class DecisionEngine:
         meta["classifier_version"] = "2.0.0"
         
         return model.model_copy(update={"metadata": meta})
-
-    @staticmethod
-    async def _invoke_claude(model: DecisionModel, client: Any) -> Optional[Dict[str, Any]]:
-        """
-        Builds context/prompt and executes Claude.
-        """
-        context = ClaudeContextBuilder.build(model)
-        prompt = ClaudePromptBuilder.build(context)
-        
-        # Simulates Claude Anthropic call
-        # In a real environment, this invokes: client.messages.create(...)
-        # We wrap it in a try-except to ensure fallback resilience.
-        response = await client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=1000,
-            temperature=0,
-            system="You are an expert security classification model. Always return valid JSON only.",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        
-        # Extract response text and parse JSON safely
-        content_text = response.content[0].text
-        import json
-        return json.loads(content_text)
