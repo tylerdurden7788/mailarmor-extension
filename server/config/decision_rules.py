@@ -62,6 +62,29 @@ RULE_PRIORITY_MAP = {
     "SEM_022": "High",     # IRS/Tax Scam
     "SEM_025": "Critical", # Extortion blackmail webcam recording
     "SEM_026": "High",     # Brand Abuse display name mismatch
+    
+    # Threat Intelligence Rules (Part 8C)
+    "TI_001": "Critical",  # Confirmed malicious hash/URI (VirusTotal, GSB)
+    "TI_002": "High",      # High-confidence phishing feed alert (PhishTank, OpenPhish)
+    "TI_003": "Medium",    # Suspicious reputation/abuse score (AbuseIPDB, Cisco Talos)
+    "TI_004": "Informational" # General domain/DNS telemetry (WHOIS, DNS, Certificate, ASN)
+}
+
+# Threat Intelligence Provider Reliability weights
+PROVIDER_RELIABILITY = {
+    "WHOIS": 0.90,
+    "DNS": 0.95,
+    "Certificate": 0.90,
+    "GoogleSafeBrowsing": 0.98,
+    "PhishTank": 0.92,
+    "OpenPhish": 0.95,
+    "URLHaus": 0.95,
+    "AbuseIPDB": 0.85,
+    "VirusTotal": 0.95,
+    "CiscoTalos": 0.90,
+    "AlienvaultOTX": 0.85,
+    "Spamhaus": 0.95,
+    "ASN": 0.90
 }
 
 # Analyzer reliability scores (0.0 to 1.0)

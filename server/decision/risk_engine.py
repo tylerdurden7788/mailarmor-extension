@@ -7,6 +7,7 @@ class RiskEngine:
     def assess(model: DecisionModel) -> DecisionModel:
         """
         Determines attack category types and maps the overall risk level.
+        Enforces threat intelligence safety caps.
         """
         correlated = model.correlated_evidence
         attack_types: Set[str] = set()
@@ -16,27 +17,49 @@ class RiskEngine:
             # Map primary
             categories = RULE_TAXONOMY_MAP.get(ev.triggered_rule, [])
             for cat in categories:
-                attack_types.add(cat)
+                if cat != "Unknown":
+                    attack_types.add(cat)
             # Map merged supporting
             supporting = (ev.technical_details or {}).get("supporting_rules", [])
             for rule in supporting:
                 categories = RULE_TAXONOMY_MAP.get(rule, [])
                 for cat in categories:
-                    attack_types.add(cat)
+                    if cat != "Unknown":
+                        attack_types.add(cat)
+                        
+            # Map campaign tags if present
+            campaign_tags = (ev.technical_details or {}).get("campaign_tags", [])
+            for tag in campaign_tags:
+                attack_types.add(tag)
                 
         # 2. Determine Risk Level based on highest priority
         max_priority = "Benign"
         priority_hierarchy = ["Critical", "High", "Medium", "Low", "Informational", "Benign"]
         
+        # Track if the highest priority comes from threat intelligence
+        highest_is_threat = False
+        has_strong_local = False
+        
         for ev in correlated:
             details = ev.technical_details or {}
             prio = details.get("priority", "Informational")
             
+            # Identify if there is any local strong indicator
+            if ev.category != "THREAT_INT" and prio in ["Critical", "High"]:
+                has_strong_local = True
+                
             # Keep highest priority in hierarchy (smaller index means higher precedence)
             if prio in priority_hierarchy:
                 if max_priority == "Benign" or priority_hierarchy.index(prio) < priority_hierarchy.index(max_priority):
                     max_priority = prio
+                    highest_is_threat = (ev.category == "THREAT_INT")
                     
+        # Safety constraint: Threat Intelligence alone cannot classify risk as Critical or High
+        # (which leads to DANGEROUS verdict) without supporting local deterministic evidence.
+        if highest_is_threat and not has_strong_local:
+            if max_priority in ["Critical", "High"]:
+                max_priority = "Medium"
+                
         # Map priority to risk level string
         risk_level = "Minimal"
         if max_priority == "Critical":
@@ -70,5 +93,8 @@ class RiskEngine:
             technical_explanation=model.technical_explanation,
             user_explanation=model.user_explanation,
             decision_trace=trace,
-            metadata=meta
+            metadata=meta,
+            
+            threat_intelligence_summary=model.threat_intelligence_summary,
+            ioc_consensus=model.ioc_consensus
         )

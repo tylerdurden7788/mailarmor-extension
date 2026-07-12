@@ -68,5 +68,11 @@ RULE_TAXONOMY_MAP = {
     "SEM_018": ["Cryptocurrency Scam"],
     "SEM_022": ["Tax Scam"],
     "SEM_025": ["Blackmail", "Extortion"],
-    "SEM_026": ["Brand Impersonation"]
+    "SEM_026": ["Brand Impersonation"],
+    
+    # Threat Intelligence Rules (Part 8C)
+    "TI_001": ["Malware Delivery", "Executable Delivery"],
+    "TI_002": ["Credential Harvesting", "Brand Impersonation"],
+    "TI_003": ["Unknown"],
+    "TI_004": ["Unknown"]
 }

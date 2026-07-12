@@ -8,13 +8,18 @@ class EvidenceCollector:
         Processes raw evidence:
         1. Deduplicates / merges identical rule triggers.
         2. Correlates related evidence items to build supporting linkages and dynamically boost confidence.
+        Does not merge threat intelligence evidence during this pre-decision collector stage.
         """
         if not raw_evidence:
             return []
             
-        # 1. Deduplication (Group by triggered_rule)
+        # Separate threat intelligence from local evidence
+        threat_evidence = [ev for ev in raw_evidence if ev.category == "THREAT_INT"]
+        local_evidence = [ev for ev in raw_evidence if ev.category != "THREAT_INT"]
+        
+        # 1. Deduplication for local evidence (Group by triggered_rule)
         grouped_evidence: Dict[str, List[Evidence]] = {}
-        for ev in raw_evidence:
+        for ev in local_evidence:
             grouped_evidence.setdefault(ev.triggered_rule, []).append(ev)
             
         merged_evidence: List[Evidence] = []
@@ -76,4 +81,6 @@ class EvidenceCollector:
                     # Increase risk contribution proportionately due to stronger evidence correlation
                     parent_ev.risk_contribution = min(100.0, parent_ev.risk_contribution * (1.0 + boost))
                     
+        # Append threat evidence without local rule correlation/merging
+        merged_evidence.extend(threat_evidence)
         return merged_evidence

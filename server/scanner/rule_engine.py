@@ -326,16 +326,66 @@ class RuleEngine:
                 
         # Collect observables from parsed context (URL and Domain)
         observables = []
+        seen_observables = set()
+        
         for url_item in parsed_urls:
-            observables.append(ThreatObservable(value=url_item.raw_url, type="URL"))
+            raw_u = url_item.raw_url
+            if raw_u and raw_u not in seen_observables:
+                seen_observables.add(raw_u)
+                observables.append(ThreatObservable(value=raw_u, type="URL"))
             
-        # Dispatch skeleton query to ProviderManager (returns [] since registry is empty)
-        try:
-            # We execute it asynchronously to ensure the path is warm, but ignore findings for now
-            # as no providers are registered in Part 8A framework yet.
-            asyncio.create_task(global_threat_manager.lookup_observables(observables))
-        except Exception:
-            pass
+            # Extract domain
+            domain = url_item.host
+            if domain and domain not in seen_observables:
+                seen_observables.add(domain)
+                observables.append(ThreatObservable(value=domain, type="Domain"))
+            
+        # Dispatch query to ProviderManager
+        if observables:
+            try:
+                threat_results = await global_threat_manager.lookup_observables(observables)
+                for res in threat_results:
+                    for te in res.evidence:
+                        # Map rule ID based on severity
+                        rule_id = "TI_004"
+                        if te.severity == "CRITICAL":
+                            rule_id = "TI_001"
+                        elif te.severity in ["HIGH", "MEDIUM"]:
+                            rule_id = "TI_002"
+                        elif te.severity == "LOW":
+                            rule_id = "TI_003"
+                            
+                        # Build technical details including provider metadata
+                        tech_details = dict(te.technical_details) if te.technical_details else {}
+                        tech_details.update({
+                            "provider": res.provider_name,
+                            "confidence": te.provider_confidence,
+                            "timestamp": te.timestamp,
+                            "observable_queried": te.observable,
+                            "provider_version": "1.0.0",
+                            "execution_time_ms": res.lookup_time_ms
+                        })
+                        if "freshness" not in tech_details:
+                            tech_details["freshness"] = "LIVE"
+                        
+                        evidence_obj = Evidence(
+                            evidence_id=f"ev_{res.provider_name}_{abs(hash(te.observable))}_{abs(hash(te.classification))}",
+                            analyzer_name=res.provider_name,
+                            category="THREAT_INT",
+                            severity=te.severity,
+                            triggered_rule=rule_id,
+                            technical_details=tech_details,
+                            confidence=te.provider_confidence,
+                            risk_contribution=0.0,
+                            explanation=f"Threat intelligence check for {te.observable} via {res.provider_name} returned classification: {te.classification}.",
+                            recommendation="Verify this threat indicator.",
+                            timestamp=te.timestamp
+                        )
+                        raw_evidence.append(evidence_obj)
+            except Exception as e:
+                # Log warning and fail safe
+                import logging
+                logging.getLogger("RuleEngine").warning(f"Error querying threat intelligence providers: {e}")
 
         # Deduplicate, merge and correlate evidence
         processed_evidence = EvidenceCollector.collect_and_process(raw_evidence)

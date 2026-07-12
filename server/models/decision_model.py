@@ -26,5 +26,10 @@ class DecisionModel(BaseModel):
     user_explanation: str = ""
     decision_trace: List[str] = Field(default_factory=list)
     
+    # Threat Intelligence Integration summaries (backward compatible)
+    threat_intelligence_summary: Dict[str, Any] = Field(default_factory=dict)
+    provider_statistics: Dict[str, Any] = Field(default_factory=dict)
+    ioc_consensus: Dict[str, Any] = Field(default_factory=dict)
+    
     # Telemetry
     metadata: Dict[str, Any] = Field(default_factory=dict)

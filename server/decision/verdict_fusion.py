@@ -74,5 +74,8 @@ class VerdictFusion:
             technical_explanation=model.technical_explanation,
             user_explanation=model.user_explanation,
             decision_trace=trace,
-            metadata=model.metadata
+            metadata=model.metadata,
+            
+            threat_intelligence_summary=model.threat_intelligence_summary,
+            ioc_consensus=model.ioc_consensus
         )

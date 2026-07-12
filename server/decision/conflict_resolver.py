@@ -39,19 +39,10 @@ class ConflictResolver:
                 details_copy["priority"] = "Low"
                 details_copy["conflict_context"] = "Superseded by critical threat indicators"
                 
-                ev_copy = Evidence(
-                    evidence_id=ev.evidence_id,
-                    analyzer_name=ev.analyzer_name,
-                    category=ev.category,
-                    severity=ev.severity,
-                    triggered_rule=ev.triggered_rule,
-                    technical_details=details_copy,
-                    confidence=max(0.1, ev.confidence - 0.5),
-                    risk_contribution=ev.risk_contribution,
-                    explanation=ev.explanation,
-                    recommendation=ev.recommendation,
-                    timestamp=ev.timestamp
-                )
+                ev_copy = ev.model_copy(update={
+                    "technical_details": details_copy,
+                    "confidence": max(0.1, ev.confidence - 0.5)
+                })
                 resolved.append(ev_copy)
             else:
                 resolved.append(ev)
@@ -77,5 +68,8 @@ class ConflictResolver:
             technical_explanation=model.technical_explanation,
             user_explanation=model.user_explanation,
             decision_trace=trace,
-            metadata=meta
+            metadata=meta,
+            
+            threat_intelligence_summary=model.threat_intelligence_summary,
+            ioc_consensus=model.ioc_consensus
         )

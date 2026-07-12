@@ -14,6 +14,12 @@ class Evidence(BaseModel):
     explanation: str = Field(description="Human-readable user-facing explanation")
     recommendation: str = Field(description="Actionable security advice for the user")
     timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat() + "Z")
+    
+    # Threat Intelligence extensions (backward compatible)
+    provider_reliability: float = Field(default=1.0, description="Weight indicating reliability of intelligence provider")
+    freshness: str = Field(default="LIVE", description="Intelligence age class: LIVE, RECENT, STALE, ARCHIVED")
+    supporting_providers: List[str] = Field(default_factory=list, description="Other providers supporting this IOC finding")
+    agreement_score: float = Field(default=1.0, description="Detections divided by active queries count")
 
 class EvidenceReport(BaseModel):
     schema_version: str = "1.0.0"
