@@ -157,6 +157,18 @@ plugin_manager.register("BrandAbuseAnalyzer", BrandAbuseAnalyzer())
 # Shared global resolver instance for redirect caching
 redirect_resolver = URLRedirectResolver(max_depth=5, timeout_sec=1.5)
 
+# Threat Intelligence Framework Setup
+from models.threat_intelligence_model import ThreatObservable
+from threat_intelligence.provider_registry import ProviderRegistry
+from threat_intelligence.provider_cache import ProviderCache
+from threat_intelligence.provider_health import ProviderHealthMonitor
+from threat_intelligence.provider_manager import ProviderManager
+
+global_threat_registry = ProviderRegistry()
+global_threat_cache = ProviderCache()
+global_threat_health = ProviderHealthMonitor()
+global_threat_manager = ProviderManager(global_threat_registry, global_threat_cache, global_threat_health)
+
 class RuleEngine:
     @staticmethod
     async def run_analysis(email: Email) -> EvidenceReport:
@@ -308,6 +320,19 @@ class RuleEngine:
                     technical_details={"analyzer_name": name, "error_details": err_msg}
                 ))
                 
+        # Collect observables from parsed context (URL and Domain)
+        observables = []
+        for url_item in parsed_urls:
+            observables.append(ThreatObservable(value=url_item.raw_url, type="URL"))
+            
+        # Dispatch skeleton query to ProviderManager (returns [] since registry is empty)
+        try:
+            # We execute it asynchronously to ensure the path is warm, but ignore findings for now
+            # as no providers are registered in Part 8A framework yet.
+            asyncio.create_task(global_threat_manager.lookup_observables(observables))
+        except Exception:
+            pass
+
         # Deduplicate, merge and correlate evidence
         processed_evidence = EvidenceCollector.collect_and_process(raw_evidence)
         
