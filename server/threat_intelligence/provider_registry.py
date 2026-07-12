@@ -9,6 +9,9 @@ class ProviderRegistry:
         
     def register(self, name: str, provider: BaseThreatProvider, metadata: Optional[Dict[str, Any]] = None) -> None:
         """Dynamically registers a provider with optional custom configuration metadata."""
+        if name in self._providers:
+            raise ValueError(f"Duplicate provider registration attempted: {name}")
+            
         self._providers[name] = provider
         
         # Merge configuration defaults with custom metadata
@@ -29,6 +32,33 @@ class ProviderRegistry:
             
         self._metadata[name] = config_meta
         
+    def validate(self) -> None:
+        """Validates all registered providers configuration parameters, failing fast on errors."""
+        for name, meta in self._metadata.items():
+            # Check timeout values
+            timeout = meta.get("timeout")
+            if timeout is not None:
+                if not isinstance(timeout, (int, float)) or timeout <= 0.0 or timeout > 30.0:
+                    raise ValueError(f"Invalid timeout value for provider {name}: {timeout}")
+                    
+            # Check cache TTL values
+            ttl = meta.get("cache_ttl")
+            if ttl is not None:
+                if not isinstance(ttl, (int, float)) or ttl < 0:
+                    raise ValueError(f"Invalid cache TTL value for provider {name}: {ttl}")
+                    
+            # Check rate_limit_delay
+            delay = meta.get("rate_limit_delay")
+            if delay is not None:
+                if not isinstance(delay, (int, float)) or delay < 0:
+                    raise ValueError(f"Invalid rate limit delay value for provider {name}: {delay}")
+                    
+            # Check endpoint URLs
+            url = meta.get("url")
+            if url:
+                if not url.startswith("http://") and not url.startswith("https://"):
+                    raise ValueError(f"Invalid API endpoint URL for provider {name}: {url}")
+
     def unregister(self, name: str) -> None:
         """Removes a registered provider."""
         if name in self._providers:

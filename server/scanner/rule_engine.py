@@ -172,6 +172,7 @@ global_threat_manager = ProviderManager(global_threat_registry, global_threat_ca
 # Auto-register all concrete providers
 from threat_intelligence.providers import register_all
 register_all(global_threat_registry)
+global_threat_registry.validate()
 
 class RuleEngine:
     @staticmethod

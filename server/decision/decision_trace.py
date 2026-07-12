@@ -5,8 +5,25 @@ class DecisionTrace:
     def generate(model: DecisionModel) -> DecisionModel:
         """
         Finalizes the structured decision trace list.
+        Incorporates threat intelligence consensus diagnostics.
         """
         trace = list(model.decision_trace)
+        
+        # Document consensus telemetry
+        consensus_keys = list(model.ioc_consensus.keys())
+        if consensus_keys:
+            trace.append(f"DIAGNOSTIC: Threat intelligence consensus generated for targets: {', '.join(consensus_keys)}.")
+            for target, stats in model.ioc_consensus.items():
+                trace.append(
+                    f"DIAGNOSTIC: target '{target}' has agreement of {stats.get('agreement_score', 0.0) * 100:.1f}% "
+                    f"across {stats.get('provider_count', 0)} providers (Freshness: {stats.get('freshness', 'LIVE')}, Severity: {stats.get('severity', 'INFO')})."
+                )
+                
+        # Append cache statistics if any
+        from utils.metrics import metrics_collector
+        decision_stats = metrics_collector.get_decision_statistics()
+        trace.append(f"DIAGNOSTIC: Decision metrics - average agreement score: {decision_stats.get('average_agreement_score', 0.0):.2f}.")
+        
         trace.append("TRACE_GENERATED: Decision pipeline trace finalized and ready for output.")
         
         return DecisionModel(
