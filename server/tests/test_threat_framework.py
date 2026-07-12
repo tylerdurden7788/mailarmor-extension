@@ -2,7 +2,7 @@ import unittest
 import asyncio
 import time
 from typing import List
-from models.threat_intelligence_model import ThreatObservable, ThreatEvidence
+from models.threat_intelligence_model import ThreatObservable, ThreatEvidence, ProviderResult
 from threat_intelligence.base_provider import BaseThreatProvider
 from threat_intelligence.provider_registry import ProviderRegistry
 from threat_intelligence.provider_cache import ProviderCache
@@ -22,13 +22,13 @@ class DummyThreatProvider(BaseThreatProvider):
     def supported_observables(self) -> List[str]:
         return ["Domain", "URL"]
         
-    async def lookup(self, observable: ThreatObservable) -> List[ThreatEvidence]:
+    async def lookup(self, observable: ThreatObservable) -> ProviderResult:
         if self.delay > 0:
             await asyncio.sleep(self.delay)
         if self.should_fail:
             raise Exception("Lookup failed")
             
-        return [
+        evidence = [
             ThreatEvidence(
                 provider=self._name,
                 observable=observable.value,
@@ -40,6 +40,13 @@ class DummyThreatProvider(BaseThreatProvider):
                 metadata={"test": True}
             )
         ]
+        return ProviderResult(
+            provider_name=self._name,
+            provider_status="SUCCESS",
+            evidence=evidence,
+            lookup_time_ms=0.0,
+            cache_hit=False
+        )
 
 class TestThreatFramework(unittest.TestCase):
     def run_async(self, coro):
@@ -78,14 +85,22 @@ class TestThreatFramework(unittest.TestCase):
             provider="CacheTest", observable="malicious.com", observable_type="Domain",
             classification="malicious", severity="MEDIUM", provider_confidence=0.8
         )]
+        result = ProviderResult(
+            provider_name="CacheTest",
+            provider_status="SUCCESS",
+            evidence=evidence,
+            lookup_time_ms=1.0,
+            cache_hit=False
+        )
         
         # Insert
-        self.run_async(cache.insert("CacheTest", obs, evidence, ttl_sec=0.2))
+        self.run_async(cache.insert("CacheTest", obs, result, ttl_sec=0.2))
         
         # Lookup hit
         hit = self.run_async(cache.lookup("CacheTest", obs))
         self.assertIsNotNone(hit)
-        self.assertEqual(len(hit), 1)
+        self.assertEqual(len(hit.evidence), 1)
+        self.assertTrue(hit.cache_hit)
         
         # Wait for expiration
         time.sleep(0.3)
@@ -126,7 +141,8 @@ class TestThreatFramework(unittest.TestCase):
         obs = ThreatObservable(value="test.com", type="Domain")
         results = self.run_async(manager.lookup_observables([obs]))
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0].provider, "ManagerTest")
+        self.assertEqual(results[0].provider_name, "ManagerTest")
+        self.assertEqual(len(results[0].evidence), 1)
         
         # Verify cached hit
         stats = cache.get_statistics()
@@ -135,6 +151,7 @@ class TestThreatFramework(unittest.TestCase):
         # Repeat lookup should hit cache
         results2 = self.run_async(manager.lookup_observables([obs]))
         self.assertEqual(len(results2), 1)
+        self.assertTrue(results2[0].cache_hit)
         stats2 = cache.get_statistics()
         self.assertEqual(stats2["hits"], 1)
 

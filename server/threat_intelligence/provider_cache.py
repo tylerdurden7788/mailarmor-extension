@@ -1,6 +1,6 @@
 import time
-from typing import Dict, Any, List, Optional
-from models.threat_intelligence_model import ThreatObservable, ThreatEvidence
+from typing import Dict, Any, Optional
+from models.threat_intelligence_model import ThreatObservable, ProviderResult
 
 class ProviderCache:
     def __init__(self):
@@ -12,7 +12,7 @@ class ProviderCache:
     def _make_key(self, provider_name: str, observable: ThreatObservable) -> str:
         return f"{provider_name}:{observable.type}:{observable.value}"
         
-    async def lookup(self, provider_name: str, observable: ThreatObservable) -> Optional[List[ThreatEvidence]]:
+    async def lookup(self, provider_name: str, observable: ThreatObservable) -> Optional[ProviderResult]:
         """Checks the cache for a non-expired entry for the given provider and observable."""
         key = self._make_key(provider_name, observable)
         entry = self._cache.get(key)
@@ -31,20 +31,32 @@ class ProviderCache:
             return None
             
         self._hits += 1
-        return entry["evidence"]
         
-    async def insert(self, provider_name: str, observable: ThreatObservable, evidence: List[ThreatEvidence], ttl_sec: float) -> None:
-        """Inserts a list of ThreatEvidence into the cache with a specified TTL."""
+        # Settle cached result with cache_hit = True
+        cached_res = entry["result"]
+        # Update cache_hit field (we re-create because it is frozen)
+        result_copy = ProviderResult(
+            provider_name=cached_res.provider_name,
+            provider_status=cached_res.provider_status,
+            evidence=cached_res.evidence,
+            lookup_time_ms=0.0,  # Cached served instantly
+            cache_hit=True,
+            timestamp=cached_res.timestamp,
+            error_message=cached_res.error_message
+        )
+        return result_copy
+        
+    async def insert(self, provider_name: str, observable: ThreatObservable, result: ProviderResult, ttl_sec: float) -> None:
+        """Inserts a ProviderResult into the cache with a specified TTL."""
         key = self._make_key(provider_name, observable)
         expires_at = time.time() + ttl_sec
         self._cache[key] = {
-            "evidence": evidence,
+            "result": result,
             "expires_at": expires_at
         }
         
     def get_statistics(self) -> Dict[str, int]:
         """Returns cache stats (hits, misses, size, evictions)."""
-        # Cleanup expired items first to yield accurate size
         now = time.time()
         expired_keys = [
             k for k, v in self._cache.items()

@@ -2,7 +2,7 @@ import asyncio
 import time
 import logging
 from typing import List, Dict, Any
-from models.threat_intelligence_model import ThreatObservable, ThreatEvidence
+from models.threat_intelligence_model import ThreatObservable, ThreatEvidence, ProviderResult
 from threat_intelligence.provider_registry import ProviderRegistry
 from threat_intelligence.provider_cache import ProviderCache
 from threat_intelligence.provider_health import ProviderHealthMonitor
@@ -16,9 +16,10 @@ class ProviderManager:
         self.cache = cache
         self.health_monitor = health_monitor
 
-    async def lookup_observables(self, observables: List[ThreatObservable]) -> List[ThreatEvidence]:
+    async def lookup_observables(self, observables: List[ThreatObservable]) -> List[ProviderResult]:
         """
         Deduplicates, normalizes, and queries all enabled providers for a list of observables.
+        Returns a list of ProviderResult objects.
         """
         # 1. Normalize and deduplicate observables
         unique_observables: Dict[tuple, ThreatObservable] = {}
@@ -28,7 +29,7 @@ class ProviderManager:
             if key not in unique_observables:
                 unique_observables[key] = ThreatObservable(value=norm_val, type=obs.type)
                 
-        results: List[ThreatEvidence] = []
+        results: List[ProviderResult] = []
         tasks = []
         
         # 2. Query enabled providers for each observable
@@ -45,9 +46,17 @@ class ProviderManager:
                 if not provider.is_supported(obs.type):
                     continue
                     
-                # Check health status
+                # Check health status (circuit-breaker)
                 if self.health_monitor.get_health_status(name) == "Unhealthy":
                     logger.warning(f"Skipping unhealthy threat provider: {name}")
+                    results.append(ProviderResult(
+                        provider_name=name,
+                        provider_status="UNAVAILABLE",
+                        evidence=[],
+                        lookup_time_ms=0.0,
+                        cache_hit=False,
+                        error_message="Skipped due to unhealthy circuit-breaker status"
+                    ))
                     continue
                     
                 # Dispatch query task
@@ -56,12 +65,16 @@ class ProviderManager:
         if tasks:
             lookup_results = await asyncio.gather(*tasks, return_exceptions=True)
             for res in lookup_results:
-                if isinstance(res, list):
-                    results.extend(res)
+                if isinstance(res, ProviderResult):
+                    results.append(res)
+                elif isinstance(res, Exception):
+                    logger.error(f"Unexpected exception during lookup task: {res}")
                     
         return results
 
-    async def _process_single_lookup(self, name: str, provider: Any, meta: Dict[str, Any], obs: ThreatObservable) -> List[ThreatEvidence]:
+    async def _process_single_lookup(self, name: str, provider: Any, meta: Dict[str, Any], obs: ThreatObservable) -> ProviderResult:
+        start_time = time.perf_counter()
+        
         # 1. Cache lookup
         cached = await self.cache.lookup(name, obs)
         if cached is not None:
@@ -71,25 +84,42 @@ class ProviderManager:
         retries = meta.get("retry_count", 2)
         ttl = meta.get("cache_ttl", 300)
         
-        # 2. Execution with retries and timeout
-        evidence: List[ThreatEvidence] = []
-        success = False
-        
-        for attempt in range(retries + 1):
-            start_time = time.perf_counter()
-            try:
-                evidence = await asyncio.wait_for(provider.lookup(obs), timeout=timeout)
-                latency_ms = (time.perf_counter() - start_time) * 1000.0
-                self.health_monitor.record_success(name, latency_ms)
-                success = True
-                break
-            except Exception as e:
-                logger.warning(f"Threat provider {name} lookup failed (attempt {attempt + 1}): {e}")
-                
-        if not success:
+        # 2. Execution with retries and timeout (already handled inside provider, but manager acts as a guard)
+        result: ProviderResult
+        try:
+            # Call provider's lookup, protecting with wait_for in case provider has no internal timeout
+            result = await asyncio.wait_for(provider.lookup(obs), timeout=timeout)
+        except asyncio.TimeoutError:
+            latency_ms = (time.perf_counter() - start_time) * 1000.0
             self.health_monitor.record_failure(name)
-            return []
+            result = ProviderResult(
+                provider_name=name,
+                provider_status="UNAVAILABLE",
+                evidence=[],
+                lookup_time_ms=latency_ms,
+                cache_hit=False,
+                error_message="Request timed out at Manager guard"
+            )
+        except Exception as e:
+            latency_ms = (time.perf_counter() - start_time) * 1000.0
+            self.health_monitor.record_failure(name)
+            result = ProviderResult(
+                provider_name=name,
+                provider_status="ERROR",
+                evidence=[],
+                lookup_time_ms=latency_ms,
+                cache_hit=False,
+                error_message=str(e)
+            )
+
+        latency_ms = (time.perf_counter() - start_time) * 1000.0
+        
+        # 3. Track in health monitor based on status
+        if result.provider_status in ["SUCCESS", "NO_DATA"]:
+            self.health_monitor.record_success(name, latency_ms)
+            # Insert in cache
+            await self.cache.insert(name, obs, result, ttl)
+        else:
+            self.health_monitor.record_failure(name)
             
-        # 3. Insert in cache
-        await self.cache.insert(name, obs, evidence, ttl)
-        return evidence
+        return result

@@ -169,6 +169,10 @@ global_threat_cache = ProviderCache()
 global_threat_health = ProviderHealthMonitor()
 global_threat_manager = ProviderManager(global_threat_registry, global_threat_cache, global_threat_health)
 
+# Auto-register all concrete providers
+from threat_intelligence.providers import register_all
+register_all(global_threat_registry)
+
 class RuleEngine:
     @staticmethod
     async def run_analysis(email: Email) -> EvidenceReport:

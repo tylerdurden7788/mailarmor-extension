@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from models.threat_intelligence_model import ThreatObservable, ThreatEvidence
+from models.threat_intelligence_model import ThreatObservable, ProviderResult
 
 class BaseThreatProvider(ABC):
     @abstractmethod
@@ -14,7 +14,7 @@ class BaseThreatProvider(ABC):
         pass
         
     @abstractmethod
-    async def lookup(self, observable: ThreatObservable) -> List[ThreatEvidence]:
+    async def lookup(self, observable: ThreatObservable) -> ProviderResult:
         """Performs lookup against the threat intelligence source."""
         pass
         
