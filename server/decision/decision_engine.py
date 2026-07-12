@@ -60,11 +60,17 @@ class DecisionEngine:
         # 8. VERDICT_FUSED state transition
         model = VerdictFusion.fuse(model, claude_response)
         
-        # 9. EXPLANATION_GENERATED state transition
-        model = ExplainabilityEngine.generate(model)
+        # 9. EXPLANATION_GENERATED & RECOMMENDATIONS_GENERATED state transitions (via ExplainabilityOrchestrator)
+        from ai.explainability_orchestrator import ExplainabilityOrchestrator
+        explainability_orchestrator = ExplainabilityOrchestrator(anthropic_client)
+        exp_response, exp_traces = await explainability_orchestrator.generate_explanations(model)
         
-        # 10. RECOMMENDATIONS_GENERATED state transition
-        model = RecommendationEngine.generate(model)
+        model = model.model_copy(update={
+            "user_explanation": exp_response.user_summary,
+            "technical_explanation": exp_response.technical_summary,
+            "recommendations": exp_response.recommendations,
+            "decision_trace": model.decision_trace + exp_traces
+        })
         
         # 11. TRACE_GENERATED state transition
         model = DecisionTrace.generate(model)
