@@ -84,6 +84,28 @@ class AIOrchestrator:
         except Exception as e:
             return self._enter_fallback_state(model, request_id, f"Prompt formatting or budget trimming error: {e}", traces)
 
+        # Outbound AI Request Security Defenses
+        from ai.security_orchestrator import security_orchestrator
+        sec_result, secured_system, secured_prompt = security_orchestrator.secure_request(
+            request_id=request_id,
+            capability=prompt_name,
+            system_prompt=system_prompt,
+            formatted_prompt=formatted_prompt
+        )
+        
+        # Append outbound security audit trail to traces
+        for stage in sec_result.audit_trail:
+            viols_str = f" | violations={stage.violations}" if stage.violations else ""
+            traces.append(f"AI_SECURITY_STAGE: {stage.stage_name} | result={stage.result} | severity={stage.severity}{viols_str}")
+
+        if not sec_result.passed:
+            err_msg = f"Outbound AI Security Policy Blocked. Violations: {sec_result.violations}"
+            return self._enter_fallback_state(model, request_id, err_msg, traces)
+
+        # Overwrite with sanitized & redacted prompts
+        system_prompt = secured_system
+        formatted_prompt = secured_prompt
+
         ai_req = AIRequest(
             request_id=request_id,
             prompt_name=prompt_name,
@@ -129,6 +151,22 @@ class AIOrchestrator:
 
         if not response or not response.success:
             return self._enter_fallback_state(model, request_id, f"Execution failed: {last_error}", traces)
+
+        # Inbound Response Security Defenses
+        sec_result = security_orchestrator.secure_response(
+            request_id=request_id,
+            security_result=sec_result,
+            completion=response.completion
+        )
+        
+        # Append response security audit trail to traces
+        for stage in sec_result.audit_trail[-3:]:
+            viols_str = f" | violations={stage.violations}" if stage.violations else ""
+            traces.append(f"AI_SECURITY_STAGE: {stage.stage_name} | result={stage.result} | severity={stage.severity}{viols_str}")
+
+        if not sec_result.passed:
+            err_msg = f"Inbound AI Security Policy Blocked. Violations: {sec_result.violations}"
+            return self._enter_fallback_state(model, request_id, err_msg, traces)
 
         # 5. State: RESPONSE_RECEIVED
         state = "RESPONSE_RECEIVED"

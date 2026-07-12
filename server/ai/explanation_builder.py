@@ -48,6 +48,24 @@ class ExplanationBuilder:
             schema_version=ai_config.SCHEMA_VERSION
         )
 
+        # Query Claude client
+        system_prompt = "You are an expert security analyst and incident response reasoning system. Always return valid JSON only."
+
+        # Outbound AI Request Security Defenses
+        from ai.security_orchestrator import security_orchestrator
+        sec_result, secured_system, secured_prompt = security_orchestrator.secure_request(
+            request_id=request_id,
+            capability=prompt_name,
+            system_prompt=system_prompt,
+            formatted_prompt=formatted_prompt
+        )
+
+        if not sec_result.passed:
+            raise ValueError(f"Outbound AI Security Policy Blocked. Violations: {sec_result.violations}")
+
+        system_prompt = secured_system
+        formatted_prompt = secured_prompt
+
         ai_req = AIRequest(
             request_id=request_id,
             prompt_name=prompt_name,
@@ -56,8 +74,6 @@ class ExplanationBuilder:
             metadata={"max_tokens": prompt_meta.max_tokens, "temperature": ai_config.TEMPERATURE}
         )
 
-        # Query Claude client
-        system_prompt = "You are an expert security analyst and incident response reasoning system. Always return valid JSON only."
         response = await orchestrator.client.execute_request(
             request=ai_req,
             system_prompt=system_prompt,
@@ -68,6 +84,16 @@ class ExplanationBuilder:
 
         if not response.success:
             raise RuntimeError(response.error or "Claude execution failed")
+
+        # Inbound Response Security Defenses
+        sec_result = security_orchestrator.secure_response(
+            request_id=request_id,
+            security_result=sec_result,
+            completion=response.completion
+        )
+
+        if not sec_result.passed:
+            raise ValueError(f"Inbound AI Security Policy Blocked. Violations: {sec_result.violations}")
 
         # Parse & Validate
         parsed = response_parser.parse_response(response.completion)
