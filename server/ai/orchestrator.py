@@ -106,6 +106,31 @@ class AIOrchestrator:
         system_prompt = secured_system
         formatted_prompt = secured_prompt
 
+        # Outbound AI Request Optimization Checks
+        from ai.optimization_orchestrator import optimization_orchestrator
+        try:
+            op_req, optimized_prompt, cached_res = optimization_orchestrator.optimize_request(
+                request_id=request_id,
+                capability=prompt_name,
+                version=prompt_ver,
+                context=formatted_prompt,
+                traces=traces
+            )
+            
+            if cached_res:
+                optimization_orchestrator.complete_cache_hit(
+                    request_id=request_id,
+                    op_req=op_req,
+                    response=cached_res,
+                    traces=traces
+                )
+                return cached_res, traces
+                
+            formatted_prompt = optimized_prompt
+        except Exception as e:
+            logger.warning(f"AI Optimization request hook failed: {e}. Proceeding without optimization.")
+            op_req = None
+
         ai_req = AIRequest(
             request_id=request_id,
             prompt_name=prompt_name,
@@ -150,6 +175,11 @@ class AIOrchestrator:
                     break
 
         if not response or not response.success:
+            if op_req:
+                try:
+                    optimization_orchestrator.optimize_response(request_id, op_req, response, traces)
+                except Exception:
+                    pass
             return self._enter_fallback_state(model, request_id, f"Execution failed: {last_error}", traces)
 
         # Inbound Response Security Defenses
@@ -166,6 +196,20 @@ class AIOrchestrator:
 
         if not sec_result.passed:
             err_msg = f"Inbound AI Security Policy Blocked. Violations: {sec_result.violations}"
+            if op_req:
+                try:
+                    failed_res = AIResponse(
+                        request_id=request_id,
+                        schema_version=ai_config.SCHEMA_VERSION,
+                        model=response.model,
+                        completion=response.completion,
+                        success=False,
+                        validation_status="SECURITY_BLOCKED",
+                        error=err_msg
+                    )
+                    optimization_orchestrator.optimize_response(request_id, op_req, failed_res, traces)
+                except Exception:
+                    pass
             return self._enter_fallback_state(model, request_id, err_msg, traces)
 
         # 5. State: RESPONSE_RECEIVED
@@ -178,6 +222,20 @@ class AIOrchestrator:
             traces.append(f"AI_ORCHESTRATOR_STATE: {state}")
             parsed_dict = response_parser.parse_response(response.completion)
         except Exception as e:
+            if op_req:
+                try:
+                    failed_res = AIResponse(
+                        request_id=request_id,
+                        schema_version=ai_config.SCHEMA_VERSION,
+                        model=response.model,
+                        completion=response.completion,
+                        success=False,
+                        validation_status="PARSING_FAILED",
+                        error=str(e)
+                    )
+                    optimization_orchestrator.optimize_response(request_id, op_req, failed_res, traces)
+                except Exception:
+                    pass
             return self._enter_fallback_state(model, request_id, f"JSON Parsing error: {e}", traces)
 
         # 7. State: VALIDATED
@@ -187,6 +245,20 @@ class AIOrchestrator:
             val_status = response_validator.validate_response(parsed_dict, prompt_meta.expected_schema)
         except Exception as e:
             ai_metrics.record_validation_failure(request_id)
+            if op_req:
+                try:
+                    failed_res = AIResponse(
+                        request_id=request_id,
+                        schema_version=ai_config.SCHEMA_VERSION,
+                        model=response.model,
+                        completion=response.completion,
+                        success=False,
+                        validation_status="VALIDATION_FAILED",
+                        error=str(e)
+                    )
+                    optimization_orchestrator.optimize_response(request_id, op_req, failed_res, traces)
+                except Exception:
+                    pass
             return self._enter_fallback_state(model, request_id, f"Schema validation error: {e}", traces)
 
         # 8. State: COMPLETE
@@ -206,6 +278,12 @@ class AIOrchestrator:
             success=True,
             validation_status=val_status
         )
+
+        if op_req:
+            try:
+                optimization_orchestrator.optimize_response(request_id, op_req, final_res, traces)
+            except Exception:
+                pass
         
         ai_metrics.record_success(
             request_id=request_id,

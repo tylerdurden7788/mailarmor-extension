@@ -51,6 +51,15 @@ class MockAnthropicClient:
 
 class TestAIOrchestration(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
+        # Clear caching and operational states to ensure complete test isolation
+        from ai.ai_cache import ai_cache
+        ai_cache.clear()
+        from ai.cost_manager import cost_manager
+        cost_manager.clear()
+        from ai.ai_circuit_breaker import ai_circuit_breaker
+        ai_circuit_breaker.state = "HEALTHY"
+        ai_circuit_breaker.failure_count = 0
+
         # Create a basic DecisionModel for testing
         self.report = EvidenceReport(
             evidence_list=[
