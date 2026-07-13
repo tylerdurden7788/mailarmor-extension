@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 class ThreatObservable(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -19,7 +19,7 @@ class ThreatEvidence(BaseModel):
     provider_confidence: float = Field(default=1.0, description="Reliability score from provider, 0.0 to 1.0")
     technical_details: Dict[str, Any] = Field(default_factory=dict, description="Metadata specific to the provider response")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Generic tags, scan date, categories, version, latency")
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat() + "Z")
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"))
 
 class ProviderResult(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -29,5 +29,5 @@ class ProviderResult(BaseModel):
     evidence: List[ThreatEvidence] = Field(default_factory=list, description="Aggregated findings")
     lookup_time_ms: float = Field(description="Execution latency in milliseconds")
     cache_hit: bool = Field(default=False, description="Whether this lookup was served from cache")
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat() + "Z")
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"))
     error_message: Optional[str] = None

@@ -1,6 +1,6 @@
 import time
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Tuple, Optional
 from models.ai_model import AIResponse
 from models.ai_operations_model import AIOperationRequest, AIOperationResult
@@ -23,7 +23,7 @@ class OptimizationOrchestrator:
         self.profiler = AIProfiler()
 
     def _create_trace(self, traces: list, state: str, details: str = "") -> None:
-        timestamp = datetime.utcnow().isoformat() + "Z"
+        timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         detail_suffix = f" | {details}" if details else ""
         traces.append(f"AI_OPTIMIZATION_STATE: {state} | {timestamp}{detail_suffix}")
 

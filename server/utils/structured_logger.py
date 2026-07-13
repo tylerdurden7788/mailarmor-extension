@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
 class StructuredLogger:
@@ -19,7 +19,7 @@ class StructuredLogger:
 
     def _log(self, level: str, event: str, provider_name: Optional[str] = None, details: Optional[Dict[str, Any]] = None) -> None:
         log_payload = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "level": level,
             "event": event,
             "provider_name": provider_name,

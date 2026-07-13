@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 from models.evidence_model import Evidence
 from config.rule_registry import RULE_REGISTRY
@@ -32,5 +32,5 @@ def create_evidence(analyzer_name: str, rule_id: str, technical_details: Dict[st
         technical_details=technical_details or {},
         explanation=rule.get("explanation", ""),
         recommendation=rule.get("recommendation", ""),
-        timestamp=datetime.utcnow().isoformat() + "Z"
+        timestamp=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     )

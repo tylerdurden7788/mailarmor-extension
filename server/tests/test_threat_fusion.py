@@ -1,7 +1,7 @@
 import unittest
 import asyncio
 from unittest.mock import AsyncMock, patch
-from datetime import datetime
+from datetime import datetime, timezone
 
 from models.evidence_model import EvidenceReport, Evidence
 from models.decision_model import DecisionModel
@@ -33,7 +33,7 @@ class TestThreatFusion(unittest.TestCase):
             category="THREAT_INT",
             severity="CRITICAL",
             triggered_rule="TI_001",
-            technical_details={"observable_queried": "unsafe.com", "timestamp": datetime.utcnow().isoformat() + "Z"},
+            technical_details={"observable_queried": "unsafe.com", "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")},
             confidence=0.90,
             explanation="Malicious domain",
             recommendation="Block"
@@ -209,13 +209,13 @@ class TestThreatFusion(unittest.TestCase):
                         classification="Malicious",
                         severity="CRITICAL",
                         provider_confidence=0.95,
-                        timestamp=datetime.utcnow().isoformat() + "Z",
+                        timestamp=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
                         technical_details={"tags": ["phishing"]}
                     )
                 ],
                 lookup_time_ms=10.0,
                 cache_hit=False,
-                timestamp=datetime.utcnow().isoformat() + "Z"
+                timestamp=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
             )
         ]
         

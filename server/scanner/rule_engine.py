@@ -1,7 +1,7 @@
 import time
 import asyncio
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 
 from models.email_model import Email
@@ -413,7 +413,7 @@ class RuleEngine:
             confidence_summary=confidence_summary,
             triggered_rules=triggered_rules,
             processing_metadata={
-                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
                 "active_analyzers_count": len(analyzers),
                 "successful_analyzers_count": sum(1 for stat in analyzer_stats.values() if stat["status"] == "SUCCESS")
             },

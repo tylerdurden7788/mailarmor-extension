@@ -2,7 +2,7 @@ from typing import List
 from models.decision_model import DecisionModel
 from models.evidence_model import Evidence
 from config.decision_rules import RULE_PRIORITY_MAP, ANALYZER_RELIABILITY, PROVIDER_RELIABILITY
-from datetime import datetime
+from datetime import datetime, timezone
 
 class EvidenceClassifier:
     @staticmethod
@@ -27,7 +27,7 @@ class EvidenceClassifier:
                 reliability = ANALYZER_RELIABILITY.get(analyzer, 0.70)
             
             # Calculate quality
-            quality = "Unknown"
+            quality = "Weak"
             if priority == "Critical" and reliability >= 0.90:
                 quality = "Verified"
             elif priority in ["Critical", "High"] and reliability >= 0.80:
@@ -41,7 +41,8 @@ class EvidenceClassifier:
             else:
                 quality = "Weak"
                 
-            # Settle freshness for threat intelligence
+            # Settle quality metrics (completeness and freshness)
+            # Default fallback values
             freshness = "LIVE"
             if ev.category == "THREAT_INT":
                 # Check if freshness is already calculated in technical_details
@@ -52,7 +53,7 @@ class EvidenceClassifier:
                         if ts_str.endswith("Z"):
                             ts_str = ts_str[:-1]
                         dt = datetime.fromisoformat(ts_str)
-                        delta_days = (datetime.utcnow() - dt).days
+                        delta_days = (datetime.now(timezone.utc).replace(tzinfo=None) - dt).days
                         if delta_days < 1:
                             freshness = "LIVE"
                         elif delta_days < 7:
@@ -86,7 +87,7 @@ class EvidenceClassifier:
                 timestamp=ev.timestamp,
                 
                 # Threat Intelligence properties
-                provider_reliability=reliability,
+                provider_reliability=str(reliability),
                 freshness=freshness,
                 supporting_providers=ev.supporting_providers or [],
                 agreement_score=ev.agreement_score

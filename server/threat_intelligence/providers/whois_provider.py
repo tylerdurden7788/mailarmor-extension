@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from models.threat_intelligence_model import ThreatObservable, ThreatEvidence, ProviderResult
 from threat_intelligence.base_provider import BaseThreatProvider
@@ -75,7 +75,7 @@ class WHOISProvider(BaseThreatProvider):
         if created_date:
             try:
                 created_dt = datetime.strptime(created_date, "%Y-%m-%d")
-                domain_age_days = (datetime.utcnow() - created_dt).days
+                domain_age_days = (datetime.now(timezone.utc).replace(tzinfo=None) - created_dt).days
             except Exception:
                 pass
 

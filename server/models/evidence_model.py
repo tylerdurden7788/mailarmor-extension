@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Evidence(BaseModel):
     evidence_id: str = Field(description="Unique identifier for this specific piece of evidence")
@@ -13,7 +13,7 @@ class Evidence(BaseModel):
     technical_details: Dict[str, Any] = Field(default_factory=dict, description="Metadata, strings, parsed arrays for developers")
     explanation: str = Field(description="Human-readable user-facing explanation")
     recommendation: str = Field(description="Actionable security advice for the user")
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat() + "Z")
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"))
     
     # Threat Intelligence extensions (backward compatible)
     provider_reliability: float = Field(default=1.0, description="Weight indicating reliability of intelligence provider")

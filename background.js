@@ -3,6 +3,12 @@
  * Manifest V3 service worker running in the background.
  */
 
+// ==========================================
+// RUNTIME BUILD CONFIGURATION
+// ==========================================
+const IS_DEVELOPMENT_BUILD = true; // SET TO false FOR PRODUCTION BUILDS
+const DEV_BYPASS_KEY = IS_DEVELOPMENT_BUILD ? "MAIL-DEV-HARISH-2026" : ""; // CLEAR FOR PRODUCTION
+
 // Log message when the background service worker starts up
 console.log("MailArmour background service started");
 
@@ -39,8 +45,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       let resultCheck = { passed: true, detail: "Domain age verified." };
       if (!dom) return resultCheck;
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
       try {
-        const response = await fetch(`https://api.domainsdb.info/v1/domains/search?domain=${dom}&zone=com`);
+        const response = await fetch(`https://api.domainsdb.info/v1/domains/search?domain=${dom}&zone=com`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
         if (response.ok) {
           const data = await response.json();
           if (data && data.domains && data.domains.length > 0) {
@@ -55,9 +67,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               }
             }
           }
+        } else {
+          resultCheck = { passed: false, detail: "Domain age could not be verified (Lookup Failed)" };
         }
       } catch (err) {
-        console.warn("Domain age API failed silently:", err);
+        console.warn("Domain age API failed or timed out:", err);
+        clearTimeout(timeoutId);
+        resultCheck = { passed: false, detail: "Domain age could not be verified (Service Offline)" };
       }
       return resultCheck;
     };
@@ -105,8 +121,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }).then(res => {
           if (!res.ok) throw new Error("Could not connect to server. Try again.");
           return res.json();
-        }).catch(err => {
-          throw new Error("MailArmour server is offline. Please ensure the backend is running at https://mailarmour-extension-production.up.railway.app");
         });
 
         const domainPromise = checkDomainAge(domain);
@@ -115,26 +129,65 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const links = emailData.links || [];
         const redirectPromises = links.map(traceRedirect);
 
-        const [result, domainCheckResult, redirectTraces] = await Promise.all([
+        const results = await Promise.allSettled([
           serverPromise,
           domainPromise,
           Promise.all(redirectPromises)
         ]);
 
+        let result = null;
+        let serverFailed = false;
+
+        if (results[0].status === "fulfilled") {
+          result = results[0].value;
+        } else {
+          serverFailed = true;
+          result = {
+            verdict: "SAFE",
+            score: 0,
+            reason: "MailArmour cloud analysis is offline. Using local checks only.",
+            user_explanation: "MailArmour cloud analysis is offline. Using local checks only.",
+            checks: {}
+          };
+        }
+
+        const domainCheckResult = results[1].status === "fulfilled" ? results[1].value : { passed: false, detail: "Domain age could not be verified (Check Bypassed)" };
+        const redirectTraces = results[2].status === "fulfilled" ? results[2].value : [];
+
         // Inject domain checker result
-        if (result && result.checks) {
-          result.checks.domain_check = domainCheckResult;
+        if (!result.checks) result.checks = {};
+        result.checks.domain_check = domainCheckResult;
+        
+        if (serverFailed) {
+          result.checks.sender_check = { passed: true, detail: "Sender checks bypassed." };
+          result.checks.urgency_check = { passed: true, detail: "Urgency checks bypassed." };
+          result.checks.content_check = { passed: true, detail: "Content checks bypassed." };
+          result.checks.attachment_check = { passed: true, detail: "Attachment checks bypassed." };
           
-          // Inject redirect logs into links check
-          const activeTraces = redirectTraces.filter(t => t !== null);
-          if (activeTraces.length > 0 && result.checks.link_check) {
-            const logs = activeTraces.map(t => {
-              const origPath = new URL(t.original).hostname + new URL(t.original).pathname;
-              const resPath = new URL(t.resolved).hostname;
-              return `${origPath} -> ${resPath}`;
-            });
-            result.checks.link_check.passed = false;
-            result.checks.link_check.detail += ` (Shortener Redirect: ${logs.join(", ")})`;
+          if (!domainCheckResult.passed) {
+            result.verdict = "SUSPICIOUS";
+            result.score = 50;
+            result.reason = `Local Warning: ${domainCheckResult.detail}. Cloud analysis offline.`;
+          }
+        }
+
+        // Inject redirect logs into links check
+        const activeTraces = redirectTraces.filter(t => t !== null);
+        if (!result.checks.link_check) {
+          result.checks.link_check = { passed: true, detail: "No links checked." };
+        }
+        if (activeTraces.length > 0) {
+          const logs = activeTraces.map(t => {
+            const origPath = new URL(t.original).hostname + new URL(t.original).pathname;
+            const resPath = new URL(t.resolved).hostname;
+            return `${origPath} -> ${resPath}`;
+          });
+          result.checks.link_check.passed = false;
+          result.checks.link_check.detail = `Shortener Redirect: ${logs.join(", ")}`;
+          if (serverFailed) {
+            result.verdict = "SUSPICIOUS";
+            result.score = 60;
+            result.reason = `Local Warning: Link redirect detected. Cloud analysis offline.`;
           }
         }
 
@@ -151,7 +204,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const key = request.licenseKey || "";
     
     // Developer testing mode override
-    if (key === "MAIL-DEV-HARISH-2026") {
+    if (IS_DEVELOPMENT_BUILD && DEV_BYPASS_KEY && key === DEV_BYPASS_KEY) {
       sendResponse({ success: true, message: "Developer mode activated" });
       return false; // synchronous response
     }

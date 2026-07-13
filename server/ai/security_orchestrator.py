@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple
 from models.ai_security_model import AISecurityResult, AuditTrailStage, RedactionStats
 from ai.prompt_sanitizer import prompt_sanitizer
@@ -15,7 +15,7 @@ import config.ai_security_config as config
 class SecurityOrchestrator:
     def _create_stage(self, name: str, result: str, severity: str, violations: List[str] = None) -> AuditTrailStage:
         return AuditTrailStage(
-            timestamp=datetime.utcnow().isoformat() + "Z",
+            timestamp=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             stage_name=name,
             result=result,
             severity=severity,
