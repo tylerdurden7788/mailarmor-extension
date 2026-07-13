@@ -65,11 +65,17 @@ class DecisionEngine:
         explainability_orchestrator = ExplainabilityOrchestrator(anthropic_client)
         exp_response, exp_traces = await explainability_orchestrator.generate_explanations(model)
         
+        meta = dict(model.metadata)
+        meta["attack_chain"] = exp_response.attack_chain
+        meta["confidence_reasoning"] = exp_response.confidence_reasoning
+        meta["executive_summary"] = exp_response.executive_summary
+        
         model = model.model_copy(update={
             "user_explanation": exp_response.user_summary,
             "technical_explanation": exp_response.technical_summary,
             "recommendations": exp_response.recommendations,
-            "decision_trace": model.decision_trace + exp_traces
+            "decision_trace": model.decision_trace + exp_traces,
+            "metadata": meta
         })
         
         # 11. TRACE_GENERATED state transition
