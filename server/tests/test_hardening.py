@@ -63,5 +63,34 @@ class TestProductionHardening(unittest.TestCase):
         dev_bypass_key_prod = "MAIL-DEV-HARISH-2026" if is_dev_build_prod else ""
         self.assertFalse(is_dev_build_prod and dev_bypass_key_prod and test_key == dev_bypass_key_prod)
 
+    def test_logging_redaction(self):
+        from utils.structured_logger import structured_logger
+        details = {
+            "api_key": "secret-api-key-12345",
+            "auth_token": "bearer-token-9999",
+            "password": "my-secret-password-xyz",
+            "safe_field": "public-data"
+        }
+        clean = structured_logger._clean_details(details)
+        self.assertEqual(clean["api_key"], "[REDACTED]")
+        self.assertEqual(clean["auth_token"], "[REDACTED]")
+        self.assertEqual(clean["password"], "[REDACTED]")
+        self.assertEqual(clean["safe_field"], "public-data")
+
+    def test_fallback_handler_datetime(self):
+        from ai.fallback_handler import fallback_handler
+        report = EvidenceReport(evidence_list=[])
+        model = DecisionModel(
+            evidence_report=report,
+            confidence=0.75,
+            risk_level="Medium",
+            attack_types=["Spear Phishing"]
+        )
+        fallback = fallback_handler.get_fallback_verdict(model, "Connection refused")
+        self.assertEqual(fallback["attack_type"], "Spear Phishing")
+        self.assertEqual(fallback["confidence"], 0.75)
+        self.assertIn("Connection refused", fallback["technical_explanation"])
+        self.assertEqual(fallback["schema_version"], "1.0.0")
+
 if __name__ == "__main__":
     unittest.main()
