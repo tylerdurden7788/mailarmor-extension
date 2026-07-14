@@ -92,5 +92,40 @@ class TestProductionHardening(unittest.TestCase):
         self.assertIn("Connection refused", fallback["technical_explanation"])
         self.assertEqual(fallback["schema_version"], "1.0.0")
 
+    def test_verdict_fusion_informational_only(self):
+        from decision.verdict_fusion import VerdictFusion
+        from decision.correlation_engine import CorrelationEngine
+        
+        # Isolated AUTH_003 trigger (Informational)
+        ev = Evidence(
+            evidence_id="ev_auth3",
+            analyzer_name="AuthenticationAnalyzer",
+            category="AUTHENTICATION",
+            severity="INFO",
+            triggered_rule="AUTH_003",
+            technical_details={"priority": "Informational"},
+            explanation="Auth headers missing",
+            recommendation="Review baseline"
+        )
+        report = EvidenceReport(evidence_list=[ev])
+        model = DecisionModel(
+            evidence_report=report,
+            confidence=0.5,
+            risk_level="Low"
+        )
+        model = CorrelationEngine.correlate(model)
+        
+        # Claude response predicts threat with high confidence (e.g. 0.85)
+        claude_response = {
+            "verdict": "SUSPICIOUS",
+            "confidence": 0.85,
+            "attack_type": "Spear Phishing"
+        }
+        
+        fused = VerdictFusion.fuse(model, claude_response)
+        
+        # The final verdict MUST remain SAFE or LIKELY_SAFE, not SUSPICIOUS, because there are no non-informational indicators!
+        self.assertIn(fused.verdict, ["SAFE", "LIKELY_SAFE"])
+
 if __name__ == "__main__":
     unittest.main()

@@ -39,13 +39,23 @@ class VerdictFusion:
         
         final_verdict = local_verdict
         
+        # Check if there are any non-informational/non-benign malicious indicators
+        has_malicious_indicators = any(
+            (ev.technical_details or {}).get("priority", "Informational") not in ["Informational", "Benign"]
+            for ev in model.correlated_evidence
+        )
+        
         if claude_response:
             ai_confidence = claude_response.get("confidence", 0.0)
             ai_type = claude_response.get("attack_type", "Unknown")
             
             # If Claude is highly confident it's a threat, we can upgrade local verdict
+            # ONLY if there is at least one local indicator higher than Informational/Benign.
             if ai_confidence >= 0.70 and ai_type != "Safe" and local_verdict in ["SAFE", "LIKELY_SAFE", "UNKNOWN"]:
-                final_verdict = "SUSPICIOUS"
+                if has_malicious_indicators:
+                    final_verdict = "SUSPICIOUS"
+                else:
+                    final_verdict = "SAFE"
                 
             # Override downgrade: if local verdict is DANGEROUS/SUSPICIOUS due to critical evidence,
             # but Claude says SAFE, we override Claude and keep the critical/suspicious verdict.
