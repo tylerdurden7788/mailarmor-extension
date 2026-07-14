@@ -1,7 +1,7 @@
 import os
 
 # Centralized AI Configuration settings
-CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
+CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-5-haiku-20241022")
 TEMPERATURE = 0.0
 MAX_TOKENS = 1000
 TIMEOUT_SEC = 5.0

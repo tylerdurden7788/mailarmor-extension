@@ -101,7 +101,11 @@ class ClaudeClient:
             
         except Exception as e:
             latency = time.perf_counter() - start_time
-            logger.error(f"Claude API query failed. Correlation ID: {request.request_id}. Error: {e}")
+            err_msg = str(e)
+            if "not found" in err_msg.lower() or "404" in err_msg or "not_found_error" in err_msg.lower():
+                logger.error(f"CRITICAL CONFIGURATION ERROR: The configured Claude model '{model_id}' is unavailable or invalid. Please check the ANTHROPIC_MODEL configuration. Error: {e}")
+            else:
+                logger.error(f"Claude API query failed. Correlation ID: {request.request_id}. Error: {e}")
             return AIResponse(
                 request_id=request.request_id,
                 schema_version=SCHEMA_VERSION,

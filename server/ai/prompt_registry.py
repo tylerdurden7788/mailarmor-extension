@@ -1,5 +1,6 @@
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
+from config.ai_config import CLAUDE_MODEL
 
 class PromptMetadata(BaseModel):
     name: str
@@ -68,7 +69,7 @@ prompt_registry.register(PromptMetadata(
     version="1.0.0",
     description="Analyze email threat signals and generate explanations",
     expected_schema=EMAIL_THREAT_ANALYSIS_SCHEMA_V1,
-    supported_model="claude-3-5-sonnet-20241022",
+    supported_model=CLAUDE_MODEL,
     max_tokens=1000,
     template=EMAIL_THREAT_ANALYSIS_TEMPLATE_V1
 ))
@@ -128,7 +129,7 @@ prompt_registry.register(PromptMetadata(
     version="1.0.0",
     description="Explain email threat signals to multiple audiences with citations",
     expected_schema=EMAIL_THREAT_EXPLAINABILITY_SCHEMA_V1,
-    supported_model="claude-3-5-sonnet-20241022",
+    supported_model=CLAUDE_MODEL,
     max_tokens=1500,
     template=EMAIL_THREAT_EXPLAINABILITY_TEMPLATE_V1
 ))
