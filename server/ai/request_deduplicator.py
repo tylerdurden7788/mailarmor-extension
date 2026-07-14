@@ -1,6 +1,6 @@
 import hashlib
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 class RequestDeduplicator:
     def __init__(self):
@@ -44,4 +44,3 @@ class RequestDeduplicator:
 
 # Global request deduplicator instance
 request_deduplicator = RequestDeduplicator()
-from typing import Tuple
