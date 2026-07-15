@@ -449,6 +449,18 @@ body {
   margin-top: 1px;
 }
 
+.check-icon-verified {
+  color: #10b981;
+}
+
+.check-icon-unknown {
+  color: #f59e0b;
+}
+
+.check-icon-suspicious {
+  color: #ef4444;
+}
+
 .check-content {
   display: flex;
   flex-direction: column;

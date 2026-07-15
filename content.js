@@ -147,6 +147,15 @@ style.textContent = `
     font-size: 12px;
     margin-top: 1px;
   }
+  .mailarmour-check-icon-verified {
+    color: #10b981;
+  }
+  .mailarmour-check-icon-unknown {
+    color: #f59e0b;
+  }
+  .mailarmour-check-icon-suspicious {
+    color: #ef4444;
+  }
   .mailarmour-check-details {
     display: flex;
     flex-direction: column;
@@ -888,10 +897,24 @@ function updateBadgeUI(result, lang) {
   checkItems.forEach(item => {
     if (checks[item.key]) {
       const checkResult = checks[item.key];
-      const checkIcon = checkResult.passed ? "🟢" : "🔴";
+      const status = checkResult.status || (checkResult.passed ? "verified" : "suspicious");
+      let iconSymbol = "✔";
+      let iconClass = "mailarmour-check-icon-verified";
+      
+      if (status === "verified") {
+        iconSymbol = "✔";
+        iconClass = "mailarmour-check-icon-verified";
+      } else if (status === "unknown") {
+        iconSymbol = "●";
+        iconClass = "mailarmour-check-icon-unknown";
+      } else if (status === "suspicious") {
+        iconSymbol = "✖";
+        iconClass = "mailarmour-check-icon-suspicious";
+      }
+
       checklistHtml += `
         <div class="mailarmour-check-item">
-          <span class="mailarmour-check-icon">${checkIcon}</span>
+          <span class="mailarmour-check-icon ${iconClass}">${iconSymbol}</span>
           <div class="mailarmour-check-details">
             <span class="mailarmour-check-title">${escapeHtml(item.title)}</span>
             <span class="mailarmour-check-desc">${escapeHtml(checkResult.detail)}</span>

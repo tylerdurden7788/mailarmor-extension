@@ -8,6 +8,7 @@
 // ==========================================
 const IS_DEVELOPMENT_BUILD = true; // SET TO false FOR PRODUCTION BUILDS
 const DEV_BYPASS_KEY = IS_DEVELOPMENT_BUILD ? "MAIL-DEV-HARISH-2026" : ""; // CLEAR FOR PRODUCTION
+const DOMAIN_AGE_THRESHOLD_DAYS = 30;
 
 // Log message when the background service worker starts up
 console.log("MailArmour background service started");
@@ -42,7 +43,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // Function to execute the domain age check
     const checkDomainAge = async (dom) => {
-      let resultCheck = { passed: true, detail: "Domain age verified." };
+      let resultCheck = { passed: true, status: "verified", detail: "Domain age verified." };
       if (!dom) return resultCheck;
       
       const controller = new AbortController();
@@ -60,20 +61,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (match && match.create_date) {
               const createDate = new Date(match.create_date);
               const diffDays = Math.ceil(Math.abs(new Date() - createDate) / (1000 * 60 * 60 * 24));
-              if (diffDays < 30) {
-                resultCheck = { passed: false, detail: `🚨 New domain — ${diffDays} days old` };
+              if (diffDays < DOMAIN_AGE_THRESHOLD_DAYS) {
+                resultCheck = { passed: false, status: "suspicious", detail: `Newly registered domain (${diffDays} days old).` };
               } else {
-                resultCheck = { passed: true, detail: `Domain is ${diffDays} days old.` };
+                resultCheck = { passed: true, status: "verified", detail: `Domain is ${diffDays} days old.` };
               }
             }
           }
         } else {
-          resultCheck = { passed: false, detail: "Domain age could not be verified (Lookup Failed)" };
+          resultCheck = {
+            passed: true,
+            status: "unknown",
+            neutral: true,
+            detail: "Domain age could not be verified because the lookup service was unavailable. This does not indicate a phishing attempt."
+          };
         }
       } catch (err) {
         console.warn("Domain age API failed or timed out:", err);
         clearTimeout(timeoutId);
-        resultCheck = { passed: false, detail: "Domain age could not be verified (Service Offline)" };
+        resultCheck = {
+          passed: true,
+          status: "unknown",
+          neutral: true,
+          detail: "Domain age could not be verified because the lookup service was unavailable. This does not indicate a phishing attempt."
+        };
       }
       return resultCheck;
     };
@@ -151,7 +162,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           };
         }
 
-        const domainCheckResult = results[1].status === "fulfilled" ? results[1].value : { passed: false, detail: "Domain age could not be verified (Check Bypassed)" };
+        const domainCheckResult = results[1].status === "fulfilled" ? results[1].value : { passed: true, status: "unknown", neutral: true, detail: "Domain age could not be verified (Check Bypassed)" };
         const redirectTraces = results[2].status === "fulfilled" ? results[2].value : [];
 
         // Inject domain checker result
@@ -164,7 +175,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           result.checks.content_check = { passed: true, detail: "Content checks bypassed." };
           result.checks.attachment_check = { passed: true, detail: "Attachment checks bypassed." };
           
-          if (!domainCheckResult.passed) {
+          if (domainCheckResult.status === "suspicious") {
             result.verdict = "SUSPICIOUS";
             result.score = 50;
             result.reason = `Local Warning: ${domainCheckResult.detail}. Cloud analysis offline.`;

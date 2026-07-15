@@ -1059,12 +1059,25 @@ function renderChecklist(checks) {
   checkKeys.forEach(item => {
     if (checks[item.key]) {
       const check = checks[item.key];
-      const statusIconSymbol = check.passed ? "🟢" : "🔴";
+      const status = check.status || (check.passed ? "verified" : "suspicious");
+      let iconSymbol = "✔";
+      let iconClass = "check-icon-verified";
+      
+      if (status === "verified") {
+        iconSymbol = "✔";
+        iconClass = "check-icon-verified";
+      } else if (status === "unknown") {
+        iconSymbol = "●";
+        iconClass = "check-icon-unknown";
+      } else if (status === "suspicious") {
+        iconSymbol = "✖";
+        iconClass = "check-icon-suspicious";
+      }
       
       const checkItem = document.createElement("div");
       checkItem.className = "checklist-item";
       checkItem.innerHTML = `
-        <span class="check-status-icon">${statusIconSymbol}</span>
+        <span class="check-status-icon ${iconClass}">${iconSymbol}</span>
         <div class="check-content">
           <span class="check-title">${escapeHtml(item.title)}</span>
           <span class="check-desc">${escapeHtml(check.detail)}</span>
