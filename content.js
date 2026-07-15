@@ -1030,23 +1030,31 @@ function getDomainFromUrl(url) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (!isContextValid()) return false;
   if (request.action === "getEmailContent") {
+    console.log("[MailArmour] getEmailContent request received");
     try {
       const elements = findGmailElements();
+      console.log("[MailArmour] Extracted Gmail elements:", elements);
       if (!elements.subject && !elements.sender && !elements.body) {
-        sendResponse({ error: "No email open or content not found" });
+        const errResp = { error: "No email open or content not found" };
+        console.log("[MailArmour] Returning error response:", errResp);
+        sendResponse(errResp);
       } else {
         const emailKey = `${elements.sender}_${elements.subject}`.toLowerCase().replace(/[^a-z0-9]/g, "");
-        sendResponse({
+        const successResp = {
           subject: elements.subject,
           sender: elements.sender,
           body: elements.body,
           emailKey: emailKey,
           attachments: detectAttachments(elements.bodyEl)
-        });
+        };
+        console.log("[MailArmour] Returning success response:", successResp);
+        sendResponse(successResp);
       }
     } catch (err) {
       console.error("MailArmour getEmailContent listener error:", err);
-      sendResponse({ error: "Failed to extract email contents: " + err.message });
+      const catchResp = { error: "Failed to extract email contents: " + err.message };
+      console.log("[MailArmour] Returning catch-block error response:", catchResp);
+      sendResponse(catchResp);
     }
   } else if (request.action === "shortcutTriggered") {
     if (!isContextValid()) return false;

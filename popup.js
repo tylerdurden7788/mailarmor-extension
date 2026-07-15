@@ -993,13 +993,27 @@ async function handleScan() {
  */
 function getEmailDataFromTab(tabId) {
   return new Promise((resolve) => {
-    chrome.tabs.sendMessage(tabId, { action: "getEmailContent" }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.warn("Runtime error sending message to content script:", chrome.runtime.lastError.message);
-        resolve(null);
-      } else {
-        resolve(response);
-      }
+    chrome.tabs.get(tabId, (tab) => {
+      const tabUrl = tab ? tab.url : "unknown";
+      console.log(`[MailArmour Popup] getEmailDataFromTab invoked. Active tab ID: ${tabId}, Active tab URL: ${tabUrl}`);
+      console.log(`[MailArmour Popup] Dispatching getEmailContent message to tab ${tabId}`);
+      
+      chrome.tabs.sendMessage(tabId, { action: "getEmailContent" }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error(`[MailArmour Popup] Message dispatch failed. chrome.runtime.lastError:`, chrome.runtime.lastError.message);
+          console.log(`[MailArmour Popup] getEmailDataFromTab returning null due to lastError`);
+          resolve(null);
+        } else {
+          console.log(`[MailArmour Popup] Message response received:`, response);
+          if (response === null || response === undefined) {
+            console.log(`[MailArmour Popup] getEmailDataFromTab returning null (response is null/undefined)`);
+            resolve(null);
+          } else {
+            console.log(`[MailArmour Popup] getEmailDataFromTab returning successfully`);
+            resolve(response);
+          }
+        }
+      });
     });
   });
 }
