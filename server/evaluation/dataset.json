@@ -1,0 +1,94 @@
+[
+  {
+    "id": "scenario_safe_corp",
+    "subject": "Q3 Engineering Planning Sync",
+    "sender": "manager@company.com",
+    "body": "Hi team, please find the agenda for our Q3 planning sync attached. We will review our project milestones and resource allocation. Let me know if you need to add anything.",
+    "attachments": [],
+    "expected_verdict": "SAFE"
+  },
+  {
+    "id": "scenario_safe_newsletter",
+    "subject": "The Weekly Tech Digest - Issue #45",
+    "sender": "digest@weeklytech.com",
+    "body": "Welcome to another issue of our tech digest! Today we talk about the advancements in AI, Web Dev frameworks in 2026, and cybersecurity best practices. Click here to read the full issue online: https://weeklytech.com/issues/45",
+    "attachments": [],
+    "expected_verdict": "SAFE"
+  },
+  {
+    "id": "scenario_safe_transactional",
+    "subject": "Your Order Receipt #84920",
+    "sender": "billing@store.com",
+    "body": "Thank you for your purchase! Your order #84920 has been processed successfully. You can download your invoice inside your dashboard: https://store.com/dashboard/orders",
+    "attachments": [],
+    "expected_verdict": "SAFE"
+  },
+  {
+    "id": "scenario_spam",
+    "subject": "CONGRATS! You won a FREE $1000 Gift Card!",
+    "sender": "noreply@giftcard-winner-super.com",
+    "body": "You have been selected to win a free $1000 Walmart Gift Card! Click here immediately to claim your prize. Limited time offer! Claim now: https://giftcard-winner-super.com/claim-reward",
+    "attachments": [],
+    "expected_verdict": "SUSPICIOUS"
+  },
+  {
+    "id": "scenario_cred_phish",
+    "subject": "[Urgent] Verify your Microsoft Account immediately",
+    "sender": "secure-admin-microsoft@microsoft-security-verify.com",
+    "body": "We detected suspicious login activity on your Microsoft 365 account. To prevent suspension, verify your account details here: https://microsoft-security-verify.com/login",
+    "attachments": [],
+    "expected_verdict": "DANGEROUS"
+  },
+  {
+    "id": "scenario_bec",
+    "subject": "Urgent wire transfer request",
+    "sender": "ceo-name@company-ceo-mail.com",
+    "body": "Hi, I am in a meeting right now and need you to execute an urgent wire transfer of $45,000 to our contractor. Please send it immediately to avoid project delays. Send it to account details: Routing 12345, Account 987654.",
+    "attachments": [],
+    "expected_verdict": "DANGEROUS"
+  },
+  {
+    "id": "scenario_invoice_fraud",
+    "subject": "Overdue Invoice #2026-904",
+    "sender": "accounting@supplier-updates.com",
+    "body": "Please find attached our overdue invoice #2026-904 for the services provided last month. Note that we have updated our bank details to Bank of America. Please wire the payment to Routing 54321, Account 123456.",
+    "attachments": [
+      {
+        "filename": "invoice_overdue.pdf",
+        "mime_type": "application/pdf",
+        "size": 15234
+      }
+    ],
+    "expected_verdict": "DANGEROUS"
+  },
+  {
+    "id": "scenario_oauth_phish",
+    "subject": "DocuSign: Share document with you",
+    "sender": "docusign-sharing@docusign-oauth-consent.com",
+    "body": "You have received a new document via DocuSign. To view this document, please sign in with your email provider and grant access permission: https://docusign-oauth-consent.com/auth/docusign",
+    "attachments": [],
+    "expected_verdict": "DANGEROUS"
+  },
+  {
+    "id": "scenario_malware_delivery",
+    "subject": "Important update regarding your shipping details",
+    "sender": "tracking@fedex-shipment-alert.com",
+    "body": "Your shipment could not be delivered due to incorrect shipping information. Please open the attached shipment details file to update your address.",
+    "attachments": [
+      {
+        "filename": "fedex_shipping_details.exe",
+        "mime_type": "application/x-msdownload",
+        "size": 254920
+      }
+    ],
+    "expected_verdict": "DANGEROUS"
+  },
+  {
+    "id": "scenario_tech_support",
+    "subject": "Microsoft Security Alert: Malware detected",
+    "sender": "support@microsoft-helpdesk-telemetry.com",
+    "body": "Warning: Your Windows computer has been infected with Trojan malware. Your files and photos are at risk. Please contact our certified helpline immediately at +1-888-555-0199 for assistance.",
+    "attachments": [],
+    "expected_verdict": "LIKELY_SAFE"
+  }
+]

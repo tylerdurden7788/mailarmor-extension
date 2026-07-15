@@ -62,12 +62,51 @@ class VerdictFusion:
             if has_critical and final_verdict in ["SAFE", "LIKELY_SAFE"]:
                 final_verdict = "DANGEROUS"
                 
+        # Compute number of unique non-informational evidence categories for Phase 2 corroboration
+        active_categories = set(
+            ev.category for ev in model.correlated_evidence
+            if (ev.technical_details or {}).get("priority", "Informational") not in ["Informational", "Benign"]
+        )
+        unique_category_count = len(active_categories)
+        
+        prio_list = [(ev.technical_details or {}).get("priority", "Informational") for ev in model.correlated_evidence]
+        has_high = "High" in prio_list
+        has_medium = "Medium" in prio_list
+        has_low = "Low" in prio_list
+        
+        # Capping isolated weak indicators: single Low/Medium category alone cannot elevate to SUSPICIOUS/DANGEROUS
+        is_isolated_weak = (unique_category_count <= 1) and (not has_critical) and (not has_high)
+        if is_isolated_weak:
+            if final_verdict in ["DANGEROUS", "SUSPICIOUS"]:
+                final_verdict = "LIKELY_SAFE" if (has_medium or has_low) else "SAFE"
+                
+        # Enforce strict multi-factor corroboration for high-threat classifications
+        has_critical_or_corroborated_high_medium = has_critical or (
+            unique_category_count >= 2 and 
+            sum(1 for ev in model.correlated_evidence if (ev.technical_details or {}).get("priority", "Informational") in ["High", "Medium"]) >= 2
+        )
+        if final_verdict == "DANGEROUS" and not has_critical_or_corroborated_high_medium:
+            final_verdict = "SUSPICIOUS"
+            
+        has_high_or_corroborated_med_low = has_high or (
+            unique_category_count >= 2 and
+            sum(1 for ev in model.correlated_evidence if (ev.technical_details or {}).get("priority", "Informational") in ["Medium", "Low"]) >= 2
+        )
+        if final_verdict == "SUSPICIOUS" and not has_high_or_corroborated_med_low:
+            final_verdict = "LIKELY_SAFE"
+            
+        # Reward multi-dimensional evidence corroboration
+        fused_confidence = model.confidence
+        if unique_category_count >= 2:
+            fused_confidence = min(1.0, fused_confidence + 0.10)
+            
         # Make sure that if there is absolutely no evidence, it is SAFE or LIKELY_SAFE
         if not model.correlated_evidence:
             final_verdict = "SAFE"
+            fused_confidence = 0.0
             
         trace = list(model.decision_trace)
-        trace.append(f"VERDICT_FUSED: Fused local rule verdict '{local_verdict}' and Claude response to reach final verdict '{final_verdict}'.")
+        trace.append(f"VERDICT_FUSED: Fused local rule verdict '{local_verdict}' and Claude response to reach final verdict '{final_verdict}' (Categories: {unique_category_count}, Corroboration Boosted Confidence: {fused_confidence:.2f}).")
         
         return DecisionModel(
             evidence_report=model.evidence_report,
@@ -76,7 +115,7 @@ class VerdictFusion:
             ignored_evidence=model.ignored_evidence,
             conflicting_evidence=model.conflicting_evidence,
             suppressed_evidence=model.suppressed_evidence,
-            confidence=model.confidence,
+            confidence=fused_confidence,
             risk_level=model.risk_level,
             attack_types=model.attack_types,
             recommendations=model.recommendations,

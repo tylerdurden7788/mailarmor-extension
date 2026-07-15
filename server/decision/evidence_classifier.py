@@ -1,7 +1,7 @@
 from typing import List
 from models.decision_model import DecisionModel
 from models.evidence_model import Evidence
-from config.decision_rules import RULE_PRIORITY_MAP, ANALYZER_RELIABILITY, PROVIDER_RELIABILITY
+from config.decision_rules import RULE_PRIORITY_MAP, ANALYZER_RELIABILITY, PROVIDER_RELIABILITY, ANALYZER_HISTORICAL_ACCURACY
 from datetime import datetime, timezone
 
 class EvidenceClassifier:
@@ -17,14 +17,26 @@ class EvidenceClassifier:
             rule_id = ev.triggered_rule
             analyzer = ev.analyzer_name
             
-            # Settle priority from config
-            priority = RULE_PRIORITY_MAP.get(rule_id, "Informational")
+            # Determine if this rule is a failure event or represents an unknown lookup failure
+            is_failed = (rule_id == "GEN_ERR") or ("error_details" in (ev.technical_details or {}))
+            failure_state = "FAILED" if is_failed else "NORMAL"
+            
+            # Settle priority from config (if failed, force Informational and INFO severity to remain neutral)
+            if is_failed:
+                priority = "Informational"
+                severity = "INFO"
+            else:
+                priority = RULE_PRIORITY_MAP.get(rule_id, "Informational")
+                severity = ev.severity
             
             # Retrieve reliability based on whether it is threat intelligence or local analyzer
             if ev.category == "THREAT_INT" or analyzer in PROVIDER_RELIABILITY:
                 reliability = PROVIDER_RELIABILITY.get(analyzer, 0.80)
             else:
                 reliability = ANALYZER_RELIABILITY.get(analyzer, 0.70)
+                
+            # Fetch historical accuracy
+            historical_accuracy = ANALYZER_HISTORICAL_ACCURACY.get(analyzer, 0.90)
             
             # Calculate quality
             quality = "Weak"
@@ -48,7 +60,7 @@ class EvidenceClassifier:
                 # Check if freshness is already calculated in technical_details
                 freshness = ev.technical_details.get("freshness", "LIVE")
                 if "timestamp" in ev.technical_details:
-                    try:
+                     try:
                         ts_str = ev.technical_details["timestamp"]
                         if ts_str.endswith("Z"):
                             ts_str = ts_str[:-1]
@@ -62,22 +74,25 @@ class EvidenceClassifier:
                             freshness = "STALE"
                         else:
                             freshness = "ARCHIVED"
-                    except Exception:
+                     except Exception:
                         pass
             
             # Create a clone of technical_details and insert tags to avoid mutation
             new_details = dict(ev.technical_details) if ev.technical_details else {}
             new_details["priority"] = priority
             new_details["reliability"] = reliability
+            new_details["confidence"] = ev.confidence
+            new_details["historical_accuracy"] = historical_accuracy
             new_details["quality"] = quality
             new_details["freshness"] = freshness
+            new_details["failure_state"] = failure_state
             
             # Create classified copy of Evidence object with threat intelligence support
             ev_copy = Evidence(
                 evidence_id=ev.evidence_id,
                 analyzer_name=ev.analyzer_name,
                 category=ev.category,
-                severity=ev.severity,
+                severity=severity,
                 triggered_rule=ev.triggered_rule,
                 technical_details=new_details,
                 confidence=ev.confidence,

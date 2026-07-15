@@ -1,0 +1,812 @@
+[
+  {
+    "timestamp": "2026-07-15T20:50:28.517144Z",
+    "accuracy": 0.8,
+    "precision": 0.8333333333333334,
+    "recall": 0.8333333333333334,
+    "f1_score": 0.8333333333333334,
+    "fpr": 0.25,
+    "fnr": 0.16666666666666666,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SAFE",
+        "actual": "DANGEROUS",
+        "status": "FALSE_POSITIVE",
+        "confidence": 0.9575
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "SUSPICIOUS",
+        "actual": "SAFE",
+        "status": "FALSE_NEGATIVE",
+        "confidence": 0.1
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T20:50:52.237603Z",
+    "accuracy": 0.8,
+    "precision": 0.8333333333333334,
+    "recall": 0.8333333333333334,
+    "f1_score": 0.8333333333333334,
+    "fpr": 0.25,
+    "fnr": 0.16666666666666666,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SAFE",
+        "actual": "DANGEROUS",
+        "status": "FALSE_POSITIVE",
+        "confidence": 0.9575
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "SUSPICIOUS",
+        "actual": "SAFE",
+        "status": "FALSE_NEGATIVE",
+        "confidence": 0.1
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T20:51:13.310049Z",
+    "accuracy": 0.8,
+    "precision": 0.8333333333333334,
+    "recall": 0.8333333333333334,
+    "f1_score": 0.8333333333333334,
+    "fpr": 0.25,
+    "fnr": 0.16666666666666666,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SAFE",
+        "actual": "DANGEROUS",
+        "status": "FALSE_POSITIVE",
+        "confidence": 0.9575
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "SUSPICIOUS",
+        "actual": "SAFE",
+        "status": "FALSE_NEGATIVE",
+        "confidence": 0.1
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T20:51:51.123907Z",
+    "accuracy": 0.8,
+    "precision": 0.8333333333333334,
+    "recall": 0.8333333333333334,
+    "f1_score": 0.8333333333333334,
+    "fpr": 0.25,
+    "fnr": 0.16666666666666666,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SAFE",
+        "actual": "SUSPICIOUS",
+        "status": "FALSE_POSITIVE",
+        "confidence": 0.5599999999999999
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "SUSPICIOUS",
+        "actual": "SAFE",
+        "status": "FALSE_NEGATIVE",
+        "confidence": 0.1
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T20:54:16.821259Z",
+    "accuracy": 0.8,
+    "precision": 0.8333333333333334,
+    "recall": 0.8333333333333334,
+    "f1_score": 0.8333333333333334,
+    "fpr": 0.25,
+    "fnr": 0.16666666666666666,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SAFE",
+        "actual": "SUSPICIOUS",
+        "status": "FALSE_POSITIVE",
+        "confidence": 0.5599999999999999
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "SUSPICIOUS",
+        "actual": "SAFE",
+        "status": "FALSE_NEGATIVE",
+        "confidence": 0.1
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T20:59:06.590869Z",
+    "accuracy": 0.8,
+    "precision": 0.8333333333333334,
+    "recall": 0.8333333333333334,
+    "f1_score": 0.8333333333333334,
+    "fpr": 0.25,
+    "fnr": 0.16666666666666666,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SAFE",
+        "actual": "SUSPICIOUS",
+        "status": "FALSE_POSITIVE",
+        "confidence": 0.5599999999999999
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "SUSPICIOUS",
+        "actual": "SAFE",
+        "status": "FALSE_NEGATIVE",
+        "confidence": 0.1
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T21:07:53.961248Z",
+    "accuracy": 0.9,
+    "precision": 1.0,
+    "recall": 0.8571428571428571,
+    "f1_score": 0.923076923076923,
+    "fpr": 0.0,
+    "fnr": 0.14285714285714285,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SUSPICIOUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.5599999999999999
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "SUSPICIOUS",
+        "actual": "SAFE",
+        "status": "FALSE_NEGATIVE",
+        "confidence": 0.1
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T21:08:28.231067Z",
+    "accuracy": 0.9,
+    "precision": 1.0,
+    "recall": 0.8571428571428571,
+    "f1_score": 0.923076923076923,
+    "fpr": 0.0,
+    "fnr": 0.14285714285714285,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SUSPICIOUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.5599999999999999
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "SUSPICIOUS",
+        "actual": "LIKELY_SAFE",
+        "status": "FALSE_NEGATIVE",
+        "confidence": 0.315
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T21:08:54.298264Z",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "fpr": 0.0,
+    "fnr": 0.0,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SUSPICIOUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.5599999999999999
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "LIKELY_SAFE",
+        "actual": "LIKELY_SAFE",
+        "status": "CORRECT",
+        "confidence": 0.315
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T21:09:36.599371Z",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "fpr": 0.0,
+    "fnr": 0.0,
+    "details": [
+      {
+        "id": "scenario_safe_corp",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.1
+      },
+      {
+        "id": "scenario_safe_newsletter",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_safe_transactional",
+        "expected": "SAFE",
+        "actual": "SAFE",
+        "status": "CORRECT",
+        "confidence": 0.0
+      },
+      {
+        "id": "scenario_spam",
+        "expected": "SUSPICIOUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.5599999999999999
+      },
+      {
+        "id": "scenario_cred_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_bec",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_invoice_fraud",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_oauth_phish",
+        "expected": "DANGEROUS",
+        "actual": "SUSPICIOUS",
+        "status": "CORRECT",
+        "confidence": 0.68
+      },
+      {
+        "id": "scenario_malware_delivery",
+        "expected": "DANGEROUS",
+        "actual": "DANGEROUS",
+        "status": "CORRECT",
+        "confidence": 0.955
+      },
+      {
+        "id": "scenario_tech_support",
+        "expected": "LIKELY_SAFE",
+        "actual": "LIKELY_SAFE",
+        "status": "CORRECT",
+        "confidence": 0.315
+      }
+    ]
+  }
+]

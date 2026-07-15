@@ -310,9 +310,10 @@ class RuleEngine:
         raw_evidence: List[Evidence] = []
         analyzer_stats: Dict[str, Any] = {}
         
-        for name, (success, evidence, err_msg) in zip(analyzer_names, results):
+        for name, (success, evidence, err_msg, duration) in zip(analyzer_names, results):
             analyzer_stats[name] = {
                 "status": "SUCCESS" if success else "FAILED",
+                "execution_time_ms": duration,
                 "evidence_count": len(evidence) if success else 0,
                 "error": err_msg
             }
@@ -322,7 +323,7 @@ class RuleEngine:
                 raw_evidence.append(create_evidence(
                     analyzer_name=name,
                     rule_id="GEN_ERR",
-                    technical_details={"analyzer_name": name, "error_details": err_msg}
+                    technical_details={"analyzer_name": name, "error_details": err_msg, "execution_time_ms": duration}
                 ))
                 
         # Collect observables from parsed context (URL and Domain)
@@ -421,14 +422,17 @@ class RuleEngine:
         )
 
     @staticmethod
-    async def _run_single_analyzer(name: str, analyzer: Any, email: Email, context: URLContext) -> tuple[bool, List[Evidence], str]:
+    async def _run_single_analyzer(name: str, analyzer: Any, email: Email, context: URLContext) -> tuple[bool, List[Evidence], str, float]:
         """
-        Runs a single analyzer asynchronously.
+        Runs a single analyzer asynchronously and records its execution duration in ms.
         """
+        start_time = time.perf_counter()
         try:
             evidence = await analyzer.analyze(email, context)
-            return True, evidence, ""
+            duration = (time.perf_counter() - start_time) * 1000.0
+            return True, evidence, "", duration
         except Exception as e:
+            duration = (time.perf_counter() - start_time) * 1000.0
             err_trace = traceback.format_exc()
             print(f"[RuleEngine] Error executing analyzer {name}: {e}\n{err_trace}")
-            return False, [], f"{e}: {traceback.format_list(traceback.extract_tb(e.__traceback__))[-1].strip()}"
+            return False, [], f"{e}: {traceback.format_list(traceback.extract_tb(e.__traceback__))[-1].strip()}", duration

@@ -195,6 +195,18 @@ class TestDecisionEngine(unittest.TestCase):
             confidence=0.80,
             timestamp="2026-07-12T02:00:00Z"
         )
+        ev2 = Evidence(
+            evidence_id="ev_url_1",
+            analyzer_name="UrlAnalyzer",
+            category="URL",
+            severity="HIGH",
+            triggered_rule="URL_001",
+            technical_details={"priority": "High"},
+            explanation="Malicious link found",
+            recommendation="Do not click",
+            confidence=0.85,
+            timestamp="2026-07-12T02:00:00Z"
+        )
         report = EvidenceReport(
             schema_version="3.0.0",
             rule_version="3.0.0",
@@ -202,9 +214,9 @@ class TestDecisionEngine(unittest.TestCase):
             scan_duration_ms=8.0,
             analyzer_statistics={},
             confidence_summary={},
-            triggered_rules=["SEM_004"],
+            triggered_rules=["SEM_004", "URL_001"],
             processing_metadata={},
-            evidence_list=[ev]
+            evidence_list=[ev, ev2]
         )
         client_ok = MockAnthropicClient(should_fail=False)
         model_ok = self.run_async(DecisionEngine.process_report(report, client_ok))
@@ -216,6 +228,39 @@ class TestDecisionEngine(unittest.TestCase):
         # Verdict must fall back to local rules (verdict remains DANGEROUS/SUSPICIOUS depending on local parameters)
         self.assertIn("DANGEROUS", [model_fail.verdict, "DANGEROUS"])
         self.assertTrue(any("WARNING" in t for t in model_fail.decision_trace))
+
+    def test_developer_mode_logging(self):
+        from fastapi.testclient import TestClient
+        from main import app
+        import os
+        import json
+        
+        log_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs", "developer_scans.jsonl")
+        if os.path.exists(log_file_path):
+            try:
+                os.remove(log_file_path)
+            except Exception:
+                pass
+                
+        client = TestClient(app)
+        payload = {
+            "subject": "Urgent Action Required",
+            "sender": "attacker@spoof.com",
+            "body": "Please log in here to verify your account details.",
+            "expected_verdict": "DANGEROUS"
+        }
+        response = client.post("/analyze", json=payload)
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertTrue(os.path.exists(log_file_path))
+        with open(log_file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            self.assertGreater(len(lines), 0)
+            last_entry = json.loads(lines[-1])
+            self.assertEqual(last_entry["expected_verdict"], "DANGEROUS")
+            self.assertIn("actual_verdict", last_entry)
+            self.assertIn("is_false_positive", last_entry)
+            self.assertIn("is_false_negative", last_entry)
 
 if __name__ == '__main__':
     unittest.main()

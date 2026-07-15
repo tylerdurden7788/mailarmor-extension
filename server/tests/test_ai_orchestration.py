@@ -118,7 +118,7 @@ class TestAIOrchestration(unittest.IsolatedAsyncioTestCase):
             context=ctx,
             prompt_template=prompt_meta.template,
             schema_version="1.0.0",
-            budget=360  # Choose budget that forces popping the low priority evidence
+            budget=550  # Choose budget that forces popping the low priority evidence
         )
         
         # Low priority CT_001 should be trimmed, BR_001 preserved!

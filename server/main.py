@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -131,6 +132,7 @@ class EmailAnalysisRequest(BaseModel):
     sender: str
     body: str
     attachments: Optional[List[Dict[str, Any]]] = Field(default=None, description="Optional attachment metadata list")
+    expected_verdict: Optional[str] = Field(default=None, description="Optional expected verdict for developer mode tracking")
 
 def map_evidence_to_checks(evidence_list: List[Evidence]) -> Dict[str, CheckResult]:
     # Set default passed values
@@ -277,10 +279,11 @@ async def analyze_email(payload: EmailAnalysisRequest):
             "decision_latency_ms": dec_latency,
             "consensus_count": consensus_count,
             "avg_agreement": avg_agreement,
-            "decision_trace": decision_model.decision_trace
+            "decision_trace": decision_model.decision_trace,
+            "decision_traces_structured": decision_model.metadata.get("decision_traces_structured", {})
         }
         
-        return EmailAnalysisResponse(
+        api_response = EmailAnalysisResponse(
             report=report,
             verdict=verdict,
             risk_level=risk_level,
@@ -299,6 +302,40 @@ async def analyze_email(payload: EmailAnalysisRequest):
             diagnostics=diagnostics,
             checks=checks_dict
         )
+        
+        # Phase 4 Developer Mode logging
+        if payload.expected_verdict:
+            expected = payload.expected_verdict.upper()
+            actual = verdict.upper()
+            
+            is_false_positive = (expected == "SAFE") and (actual != "SAFE")
+            is_false_negative = (expected != "SAFE") and (actual == "SAFE")
+            is_borderline = 0.35 <= confidence <= 0.65
+            
+            log_entry = {
+                "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                "subject": payload.subject,
+                "sender": payload.sender,
+                "expected_verdict": expected,
+                "actual_verdict": actual,
+                "confidence": confidence,
+                "is_false_positive": is_false_positive,
+                "is_false_negative": is_false_negative,
+                "is_borderline": is_borderline,
+                "decision_traces_structured": decision_model.metadata.get("decision_traces_structured", {})
+            }
+            
+            try:
+                logs_dir = os.path.join(os.path.dirname(__file__), "logs")
+                os.makedirs(logs_dir, exist_ok=True)
+                log_file_path = os.path.join(logs_dir, "developer_scans.jsonl")
+                import json
+                with open(log_file_path, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(log_entry) + "\n")
+            except Exception as log_ex:
+                print(f"[Developer Mode Log Error] Failed to write scan logs: {log_ex}")
+                
+        return api_response
     except Exception as e:
         print(f"[API Error] Unified production analysis pipeline failed: {e}")
         import traceback

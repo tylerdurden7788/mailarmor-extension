@@ -48,10 +48,13 @@ CONTEXT:
 
 INSTRUCTIONS:
 1. Reason only from the provided evidence. Do not invent any new indicators.
-2. Determine if the email represents a threat, indicating the likely attack_type category.
-3. Formulate a technical explanation detailing why the flags trigger a risk, and a non-technical explanation advising the user on safety.
-4. Output your analysis strictly as a single JSON object. Do not include markdown formatting or extra text outside the JSON.
-5. In your JSON response, always set "schema_version" to "{schema_version}".
+2. Critically evaluate the strength, reliability, freshness, and failure state of each piece of evidence. Identify potential weaknesses (e.g., low source reliability, low-confidence rules, offline/failure fallback state), conflicts (e.g., brand spoofing flagged but SPF/DKIM are fully aligned), and weigh opposing signals (e.g., threat intelligence domain safety vs. brand abuse or domain age).
+3. Do NOT blindly trust or summarize every triggered rule; evaluate whether the combination of signals forms a cohesive attack vector. If a rule has a failed or offline state, treat it as neutral.
+4. Determine if the email represents a threat, indicating the likely attack_type category.
+5. Formulate a technical explanation detailing why the flags trigger a risk (or why they are dismissed/calibrated), and a non-technical explanation advising the user on safety.
+6. List all unresolved contradictions, missing indicators, or signal weaknesses in the "uncertainties" array.
+7. Output your analysis strictly as a single JSON object. Do not include markdown formatting or extra text outside the JSON.
+8. In your JSON response, always set "schema_version" to "{schema_version}".
 
 JSON Schema:
 {{
@@ -105,12 +108,13 @@ CONTEXT:
 
 INSTRUCTIONS:
 1. Generate multiple audience-specific explanation summaries (technical analyst report, non-technical user advice, executive manager summary).
-2. Construct a step-by-step chronological attack chain of events. Every node in the chain must represent a verified evidence trigger and include its confidence (e.g., "Spoofed Domain Detected (Confidence: 0.9)").
-3. Cite the relevant evidence rules (e.g. [BR_001], [CT_001]) explicitly in your summaries, explaining exactly how they support your conclusions.
-4. Explain why the confidence score has the assigned value by attributing it to key factors (agreement count, source reliability, etc.).
-5. Generate actionable mitigation recommendations tailored to this threat.
-6. Output your response strictly as a single JSON object. Do not include markdown formatting or extra text outside the JSON.
-7. In your JSON response, always set "schema_version" to "{schema_version}".
+2. Critically analyze the strength and quality of the evidence. Do not blindly trust or copy rule summaries; weigh signal reliability, freshness, and conflicts. Point out if certain alerts are weak, overridden, or contradictory.
+3. Construct a step-by-step chronological attack chain of events. Every node in the chain must represent a verified, high-quality evidence trigger and include its confidence (e.g., "Spoofed Domain Detected (Confidence: 0.9)"). Omit rules with a failure or offline status.
+4. Cite the relevant evidence rules (e.g. [BR_001], [CT_001]) explicitly in your summaries, explaining exactly how they support your conclusions.
+5. Explain why the confidence score has the assigned value by attributing it to key factors (agreement count, source reliability, dynamic weights, etc.).
+6. Generate actionable mitigation recommendations tailored to this threat.
+7. Output your response strictly as a single JSON object. Do not include markdown formatting or extra text outside the JSON.
+8. In your JSON response, always set "schema_version" to "{schema_version}".
 
 JSON Schema:
 {{
@@ -119,7 +123,7 @@ JSON Schema:
   "executive_summary": "string citing evidence rules",
   "attack_chain": ["stage 1 (Confidence: float)", "stage 2 (Confidence: float)"],
   "recommendations": ["string"],
-  "confidence_reasoning": "string explaining attribution",
+  "confidence_reasoning": "string explaining attribution and evaluation of evidence strength/conflicts",
   "schema_version": "string"
 }}
 """

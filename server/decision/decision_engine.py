@@ -90,4 +90,39 @@ class DecisionEngine:
         meta["rules_version"] = "2.0.0"
         meta["classifier_version"] = "2.0.0"
         
+        # Construct structured decision trace metadata for Phase 1 Explainability
+        executed_analyzers = []
+        for name, stats in report.analyzer_statistics.items():
+            executed_analyzers.append({
+                "analyzer_name": name,
+                "status": stats.get("status", "UNKNOWN"),
+                "execution_time_ms": stats.get("execution_time_ms", 0.0),
+                "evidence_count": stats.get("evidence_count", 0),
+                "error": stats.get("error", "")
+            })
+            
+        triggered_rules_details = []
+        for ev in model.correlated_evidence:
+            details = ev.technical_details or {}
+            triggered_rules_details.append({
+                "rule_id": ev.triggered_rule,
+                "analyzer_name": ev.analyzer_name,
+                "category": ev.category,
+                "severity": ev.severity,
+                "priority": details.get("priority", "Informational"),
+                "confidence_contribution": ev.confidence,
+                "risk_contribution": ev.risk_contribution,
+                "explanation": ev.explanation
+            })
+            
+        decision_traces_structured = {
+            "executed_analyzers": executed_analyzers,
+            "triggered_rules": triggered_rules_details,
+            "final_normalized_score": int(model.confidence * 100),
+            "final_verdict": model.verdict,
+            "final_risk_level": model.risk_level,
+            "claude_reasoning_summary": meta.get("confidence_reasoning", "") or model.technical_explanation
+        }
+        meta["decision_traces_structured"] = decision_traces_structured
+        
         return model.model_copy(update={"metadata": meta})

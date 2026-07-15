@@ -45,6 +45,7 @@ RULE_PRIORITY_MAP = {
     "ATT_011": "Critical", # Nested sub-executable hidden inside document
     
     # Semantic Rules
+    "SEM_003": "Low",      # Urgency/Authority social engineering tactics
     "SEM_004": "High",     # Credential Harvesting pretext
     "SEM_005": "High",     # Business Email Compromise (BEC)
     "SEM_006": "High",     # Invoice Fraud
@@ -124,6 +125,45 @@ ANALYZER_RELIABILITY = {
     "TaxScamAnalyzer": 0.85,
     "BlackmailExtortionAnalyzer": 0.90,
     "BrandAbuseAnalyzer": 0.85
+}
+
+# Historical Accuracy ratings (0.0 to 1.0)
+ANALYZER_HISTORICAL_ACCURACY = {
+    "UnicodeAnalyzer": 0.98,
+    "FileSignatureAnalyzer": 0.97,
+    "ExecutableAnalyzer": 0.99,
+    "UrlAnalyzer": 0.92,
+    "HtmlAnalyzer": 0.90,
+    "DOMAnalyzer": 0.91,
+    "FormAnalyzer": 0.94,
+    "CSSAnalyzer": 0.88,
+    "JavaScriptAnalyzer": 0.89,
+    "AttachmentAnalyzer": 0.95,
+    "MIMEAnalyzer": 0.96,
+    "ArchiveAnalyzer": 0.94,
+    "OfficeDocumentAnalyzer": 0.93,
+    "PDFAnalyzer": 0.92,
+    "ScriptAnalyzer": 0.95,
+    "ImageAnalyzer": 0.85,
+    "IntentAnalyzer": 0.82,
+    "VictimActionAnalyzer": 0.80,
+    "SocialEngineeringAnalyzer": 0.84,
+    "CredentialHarvestingAnalyzer": 0.92,
+    "BusinessEmailCompromiseAnalyzer": 0.93,
+    "CEOFraudAnalyzer": 0.95,
+    "InvoiceFraudAnalyzer": 0.91,
+    "PaymentDiversionAnalyzer": 0.91,
+    "PayrollFraudAnalyzer": 0.92,
+    "AccountTakeoverAnalyzer": 0.88,
+    "OAuthConsentAnalyzer": 0.94,
+    "MFAHarvestingAnalyzer": 0.92,
+    "QRPhishingAnalyzer": 0.93,
+    "TechnicalSupportScamAnalyzer": 0.87,
+    "DeliveryScamAnalyzer": 0.85,
+    "BankingScamAnalyzer": 0.92,
+    "TaxScamAnalyzer": 0.92,
+    "BlackmailExtortionAnalyzer": 0.95,
+    "BrandAbuseAnalyzer": 0.90
 }
 
 # Conflict resolution overrides
