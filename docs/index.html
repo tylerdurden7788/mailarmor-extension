@@ -3,516 +3,553 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MailArmour | Shield Your Gmail Inbox From Phishing</title>
-  <!-- Google Fonts: Inter & Outfit -->
+  <title>MailArmour</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="An interactive storytelling experience mapping the signals of email phishing scams. Discover how MailArmour protects Gmail in real-time.">
+  
+  <!-- Google Fonts: Inter (Body) & Outfit (Display Headers) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <style>
-    /* Styling tokens */
-    :root {
-      --font-main: 'Inter', sans-serif;
-      --font-display: 'Outfit', sans-serif;
-      --bg-dark: #070a13;
-      --bg-card: rgba(18, 24, 38, 0.7);
-      --primary: #2563eb;
-      --primary-glow: rgba(37, 99, 235, 0.4);
-      --accent: #6366f1;
-      --accent-glow: rgba(99, 102, 241, 0.3);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --border: rgba(33, 44, 62, 0.6);
-      --gradient-primary: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
-      --gradient-dark: linear-gradient(180deg, #090d16 0%, #070a13 100%);
-      --radius-lg: 24px;
-      --radius-md: 16px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      scroll-behavior: smooth;
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      background-image: var(--gradient-dark);
-      color: var(--text-main);
-      font-family: var(--font-main);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    /* Glow overlays for premium aesthetics */
-    .glow-blob {
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      background: var(--primary);
-      filter: blur(150px);
-      opacity: 0.15;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .blob-1 { top: 10%; left: -100px; }
-    .blob-2 { top: 60%; right: -100px; background: var(--accent); }
-
-    /* Container */
-    .container {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Header styling */
-    header {
-      padding: 24px 0;
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(7, 10, 19, 0.8);
-    }
-
-    .header-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-    }
-
-    .brand-logo {
-      width: 36px;
-      height: 36px;
-    }
-
-    .brand-name {
-      font-family: var(--font-display);
-      font-size: 24px;
-      font-weight: 800;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.03em;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 15px;
-      transition: var(--transition);
-    }
-
-    .nav-links a:hover {
-      color: var(--text-main);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 28px;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 30px;
-      text-decoration: none;
-      transition: var(--transition);
-      cursor: pointer;
-      border: 1px solid transparent;
-    }
-
-    .btn-primary {
-      background: var(--gradient-primary);
-      color: #fff;
-      box-shadow: 0 4px 20px var(--primary-glow);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px var(--primary-glow);
-    }
-
-    .btn-outline {
-      border-color: var(--border);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-main);
-    }
-
-    .btn-outline:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--text-muted);
-      transform: translateY(-2px);
-    }
-
-    /* Hero Section */
-    .hero {
-      padding: 100px 0 80px;
-      text-align: center;
-    }
-
-    .hero-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
-      background: rgba(37, 99, 235, 0.1);
-      border: 1px solid rgba(37, 99, 235, 0.3);
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #60a5fa;
-      margin-bottom: 24px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: 56px;
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -0.03em;
-      max-width: 800px;
-      margin: 0 auto 24px;
-    }
-
-    .hero-title span {
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero-desc {
-      font-size: 18px;
-      color: var(--text-muted);
-      max-width: 600px;
-      margin: 0 auto 40px;
-    }
-
-    .hero-cta {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-    }
-
-    /* Features Section */
-    .features {
-      padding: 80px 0;
-    }
-
-    .section-header {
-      text-align: center;
-      margin-bottom: 60px;
-    }
-
-    .section-title {
-      font-family: var(--font-display);
-      font-size: 38px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-    }
-
-    .section-desc {
-      font-size: 16px;
-      color: var(--text-muted);
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-    }
-
-    .feature-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 32px;
-      transition: var(--transition);
-      backdrop-filter: blur(8px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--gradient-primary);
-      opacity: 0;
-      transition: var(--transition);
-    }
-
-    .feature-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(99, 102, 241, 0.4);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .feature-card:hover::before {
-      opacity: 1;
-    }
-
-    .feature-icon {
-      font-size: 32px;
-      margin-bottom: 20px;
-    }
-
-    .feature-card-title {
-      font-family: var(--font-display);
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-
-    .feature-card-desc {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    /* Pricing Section */
-    .pricing {
-      padding: 80px 0 120px;
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 32px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .pricing-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 48px 32px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      backdrop-filter: blur(8px);
-      transition: var(--transition);
-    }
-
-    .pricing-card:hover {
-      border-color: rgba(99, 102, 241, 0.3);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .pricing-card.premium-tier {
-      border-color: var(--primary);
-      box-shadow: 0 4px 30px rgba(37, 99, 235, 0.15);
-    }
-
-    .pricing-card.premium-tier::after {
-      content: 'POPULAR';
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      background: var(--primary);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 12px;
-      letter-spacing: 0.05em;
-    }
-
-    .tier-name {
-      font-family: var(--font-display);
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-
-    .pricing-card.premium-tier .tier-name {
-      color: #60a5fa;
-    }
-
-    .tier-price {
-      font-family: var(--font-display);
-      font-size: 48px;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 24px;
-    }
-
-    .tier-price span {
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--text-muted);
-    }
-
-    .tier-features {
-      list-style: none;
-      margin-bottom: 40px;
-      flex-grow: 1;
-    }
-
-    .tier-features li {
-      margin-bottom: 16px;
-      font-size: 15px;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .tier-features li::before {
-      content: '✓';
-      color: #10b981;
-      font-weight: 700;
-    }
-
-    .pricing-card.free-tier .tier-features li.pro-only {
-      color: var(--text-muted);
-      opacity: 0.5;
-    }
-
-    .pricing-card.free-tier .tier-features li.pro-only::before {
-      content: '✕';
-      color: #ef4444;
-    }
-
-    /* Footer styling */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 40px 0;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 14px;
-      background: rgba(5, 7, 13, 0.9);
-    }
-
-    footer p {
-      margin-top: 12px;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 40px;
-      }
-      .nav-links {
-        display: none;
-      }
-      .pricing-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="Logo.png">
 </head>
 <body>
-  <div class="glow-blob blob-1"></div>
-  <div class="glow-blob blob-2"></div>
 
-  <!-- Header Area -->
-  <header>
-    <div class="container header-nav">
-      <a href="#" class="brand">
-        <!-- We use an inline SVG for the logo that fits dark theme perfectly -->
-        <svg class="brand-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M24 4L6 12V22C6 33 13.7 43.3 24 46C34.3 43.3 42 33 42 22V12L24 4Z" fill="url(#logo-grad)" stroke="#3b82f6" stroke-width="2"/>
-          <path d="M24 14V34M17 21L24 14L31 21" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <defs>
-            <linearGradient id="logo-grad" x1="6" y1="4" x2="42" y2="46" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#1e3a8a" stop-opacity="0.8"/>
-              <stop offset="1" stop-color="#2563eb" stop-opacity="0.3"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <span class="brand-name">MailArmour</span>
+  <!-- Floating Navigation Bar -->
+  <header style="padding: 10px 24px !important;">
+    <div class="header-nav" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <a href="#" class="brand" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+        <img src="Logo.png" alt="MailArmour Logo" class="header-logo" style="max-height: 80px; width: auto; display: block;" />
+        <div class="brand-text" style="display: flex; flex-direction: column; justify-content: center; gap: 1px; font-family: 'Tahoma', sans-serif;">
+          <span class="brand-name" style="font-family: 'Audiowide', sans-serif; font-size: 26px; font-weight: bold; line-height: 1.1; color: #245EDC; margin: 0; padding: 0;">MailArmour</span>
+          <span class="brand-subtitle" style="font-size: 15px; font-weight: bold; line-height: 1.1; color: #245EDC; margin: 0; padding: 0;">Forged to defend</span>
+        </div>
       </a>
       
       <ul class="nav-links">
-        <li><a href="#features">Features</a></li>
+        <li><a href="#features">Audits</a></li>
         <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
       </ul>
+
+      <div class="xp-theme-selector-container">
+        <label for="xp-theme-select">Theme:</label>
+        <select id="xp-theme-select" class="xp-select-control">
+          <option value="luna">XP Luna</option>
+          <option value="dark">XP Dark</option>
+        </select>
+      </div>
 
       <a href="https://chrome.google.com/webstore/detail/mailarmour" target="_blank" class="btn btn-primary">Add to Chrome</a>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-tag">🔒 Gmail Security Extension</div>
-      <h1 class="hero-title">Protect Your Inbox from <span>Phishing & Scam</span> Emails Instantly</h1>
-      <p class="hero-desc">
-        MailArmour uses advanced models and multi-dimensional security audits to scan sender credentials, links, and urgency signals in real time.
+  <!-- Phishing-Sea Fisherman Hero Section -->
+  <section id="hero-ocean">
+    <!-- Dense Bubble Sea Container -->
+    <div id="bubble-field-container"></div>
+
+    <!-- Intro Typography Overlay -->
+    <div class="hero-intro-overlay" id="hero-intro-text-box">
+      <h1 class="hero-intro-title">Catch Phishing Before It Catches You.</h1>
+      <p class="hero-intro-text">
+        MailArmour operates silently in the background, identifying the hidden clues inside modern phishing attacks to secure your inbox in real-time.
       </p>
-      <div class="hero-cta">
-        <a href="https://chrome.google.com/webstore/detail/mailarmour" target="_blank" class="btn btn-primary">Add to Chrome — It's Free</a>
+      <div class="hero-cta-buttons">
+        <a href="#features" class="btn btn-primary">Get Started</a>
         <a href="#features" class="btn btn-outline">Learn More</a>
+      </div>
+    </div>
+
+    <!-- Phisher Scene (Phisher's Boat + Phisher + Rod) -->
+    <div class="phisher-scene">
+      <div id="phisher-speech" class="phisher-speech-bubble">
+        I'm Abi, I'm the Phisher here to explain things. Click on the red bubbles to know more.
+      </div>
+      <svg class="phisher-svg" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Shadow -->
+        <ellipse cx="80" cy="115" rx="55" ry="9" fill="rgba(0, 0, 0, 0.45)" />
+        <!-- Boat Hull Outline -->
+        <path d="M25 100 C37 122, 123 122, 135 100 C144 87, 16 87, 25 100 Z" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round"/>
+        <!-- Internal Deck Outline -->
+        <path d="M29 97 C39 114, 121 114, 131 97 Z" fill="none" />
+        <!-- Phisher Silhouette -->
+        <path d="M70 95 C70 78, 90 78, 90 95 Z" fill="#475569"/>
+        <circle cx="80" cy="74" r="9.5" fill="#475569"/>
+        <!-- Stylized Hat -->
+        <path d="M66 71 C70 65, 90 65, 94 71 L97 73 L63 73 Z" fill="#334155" stroke="#475569" stroke-width="1" />
+        <!-- Fishing Rod pointing down-right -->
+        <line x1="84" y1="78" x2="148" y2="108" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+        <!-- Painted Boat Name (Rendered last for maximum overlay visibility) -->
+        <text x="80" y="112" fill="#F5F7FA" font-size="10.5" font-family="'Outfit', sans-serif" font-weight="700" text-anchor="middle" letter-spacing="0.3">• The Phisher •</text>
+      </svg>
+    </div>
+
+    <!-- Dynamic Fishing Overlay (Line + Hook) -->
+    <svg id="fishing-overlay" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path id="dynamic-line" stroke="rgba(148, 163, 184, 0.45)" stroke-width="1.2" stroke-linecap="round"/>
+      <g id="dynamic-hook">
+        <path d="M0 0 L0 10 A4 4 0 0 1 -4 14 A4 4 0 0 1 -8 10 L-8 6" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      </g>
+    </svg>
+
+    <!-- Dynamic Incident Explanation Modal -->
+    <div id="incident-modal" class="modal-overlay">
+      <div class="modal-content">
+        <button class="modal-close-btn" id="modal-close-x" aria-label="Close modal">&times;</button>
+        <div class="modal-header">
+          <span class="modal-badge">Real-World Incident Security Analysis</span>
+          <h3 id="modal-title" class="modal-title">Incident Title</h3>
+        </div>
+        <div class="modal-body">
+          <div class="modal-section">
+            <h4>What Happened</h4>
+            <p id="modal-what"></p>
+          </div>
+          <div class="modal-section">
+            <h4>How It Was Done</h4>
+            <p id="modal-how"></p>
+          </div>
+          <div class="modal-sectionHighlight">
+            <h4>How MailArmour Predicts / Warns</h4>
+            <p id="modal-warn"></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary modal-action-btn" id="modal-close-btn">Return to Sea</button>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Features Section -->
+  <!-- Section 2: What the Phisher Sees -->
+  <section id="security-lens" class="mailarmour-analysis-section">
+    <div class="container">
+      <div class="analysis-title-wrapper">
+        <span class="analysis-tag">Evidence Lens</span>
+        <h2 class="analysis-title">WHAT THE PHISHER SEES</h2>
+        <p class="analysis-subtitle">Behind every convincing phishing email are clues. MailArmour analyzes the sender, authentication, links, content, and behavior to uncover them.</p>
+      </div>
+
+      <div class="analysis-grid">
+        <!-- Left Side: Suspicious Email Card -->
+        <div class="analysis-left-col">
+          <div class="analysis-email-card animate-stage">
+            <div class="email-card-header">
+              <div class="email-sender-info">
+                <span class="email-sender-label">From:</span>
+                <span class="email-sender-name">Microsoft Account Security</span>
+                <span class="email-sender-address">&lt;<span class="email-clue-highlight trigger-identity" data-target="identity">security@<span class="email-clue-bold">micr0soft-support.com</span></span>&gt;</span>
+              </div>
+              <div class="email-subject-line">
+                <span class="email-subject-label">Subject:</span>
+                <span class="email-subject-content"><span class="email-clue-highlight trigger-brand" data-target="brand">Your account requires immediate verification</span></span>
+              </div>
+            </div>
+            <div class="email-card-body">
+              <p>Your account has been flagged for unusual activity.</p>
+              <p>To prevent temporary suspension, please verify your account <span class="email-clue-highlight trigger-urgency" data-target="urgency">immediately</span>.</p>
+              
+              <div class="email-btn-wrapper">
+                <span class="email-clue-highlight trigger-link" data-target="link">
+                  <a href="#security-lens" class="email-mock-btn" onclick="return false;">Verify Account</a>
+                </span>
+              </div>
+              
+              <p class="email-footer-warning">
+                Failure to verify your account <span class="email-clue-highlight trigger-urgency" data-target="urgency">within 24 hours</span> may result in restricted access.
+              </p>
+            </div>
+          </div>
+          <div class="analysis-lens-caption">
+            Hover over or tap the highlighted email clues to focus on corresponding evidence analyses.
+          </div>
+        </div>
+
+        <!-- Right Side: MailArmour Analysis Cards -->
+        <div class="analysis-right-col">
+          <div class="analysis-pipeline-container">
+            <!-- Card 1 -->
+            <div class="analysis-card animate-stage card-identity" data-clue="identity">
+              <div class="analysis-card-header">
+                <span class="analysis-card-category">IDENTITY ANALYSIS</span>
+                <span class="analysis-status-tag status-danger">SUSPICIOUS</span>
+              </div>
+              <p class="analysis-card-text">Sender domain does not align with the claimed organization.</p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="analysis-card animate-stage card-url" data-clue="link">
+              <div class="analysis-card-header">
+                <span class="analysis-card-category">URL INTELLIGENCE</span>
+                <span class="analysis-status-tag status-danger">HIGH RISK</span>
+              </div>
+              <p class="analysis-card-text">Destination URL redirects to a lookalike credential verification page.</p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="analysis-card animate-stage card-content" data-clue="content">
+              <div class="analysis-card-header">
+                <span class="analysis-card-category">CONTENT ANALYSIS</span>
+                <span class="analysis-status-tag status-danger">CREDENTIAL HARVESTING</span>
+              </div>
+              <p class="analysis-card-text">Message attempts to persuade the recipient to authenticate.</p>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="analysis-card animate-stage card-social" data-clue="urgency">
+              <div class="analysis-card-header">
+                <span class="analysis-card-category">SOCIAL ENGINEERING</span>
+                <span class="analysis-status-tag status-warning">URGENCY DETECTED</span>
+              </div>
+              <p class="analysis-card-text">Message creates pressure through an artificial deadline.</p>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="analysis-card animate-stage card-brand" data-clue="brand">
+              <div class="analysis-card-header">
+                <span class="analysis-card-category">BRAND IMPERSONATION</span>
+                <span class="analysis-status-tag status-danger">DETECTED</span>
+              </div>
+              <p class="analysis-card-text">Sender attempts to appear associated with Microsoft.</p>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="analysis-card animate-stage card-auth" data-clue="auth">
+              <div class="analysis-card-header">
+                <span class="analysis-card-category">AUTHENTICATION</span>
+                <span class="analysis-status-tag status-warning">INCONSISTENT</span>
+              </div>
+              <div class="analysis-auth-metrics">
+                <span class="auth-metric metric-pass">SPF ✓</span>
+                <span class="auth-metric metric-pass">DKIM ✓</span>
+                <span class="auth-metric metric-warn">DMARC ⚠</span>
+              </div>
+              <p class="analysis-card-text">Authentication evidence does not provide sufficient confidence in the sender identity.</p>
+              <div class="analysis-auth-caption">Authentication is evidence — not the verdict.</div>
+            </div>
+          </div>
+
+          <!-- Evidence Correlation Flow -->
+          <div class="analysis-correlation-flow animate-stage">
+            <div class="correlation-connector-line"></div>
+            <span class="correlation-label">Correlating Multi-Layered Signals...</span>
+          </div>
+
+          <!-- Final Verdict Card -->
+          <div class="analysis-verdict-card animate-stage">
+            <div class="verdict-card-header">
+              <span class="verdict-title">MAILARMOUR ASSESSMENT</span>
+              <span class="verdict-score-badge">HIGH RISK</span>
+            </div>
+            <div class="verdict-score-row">
+              <div class="verdict-threat-type">Credential Harvesting Impersonation</div>
+              <div class="verdict-score-value">94<span class="verdict-score-max">/100</span></div>
+            </div>
+            <p class="verdict-desc">Multiple independent signals indicate that this message is attempting to impersonate a trusted organization and harvest credentials.</p>
+            <div class="verdict-audit-summary">
+              <span class="verdict-summary-badge badge-high">5 HIGH-RISK SIGNALS</span>
+              <span class="verdict-summary-badge badge-warn">2 WARNING SIGNALS</span>
+            </div>
+            <div class="verdict-illustrative-label">Illustrative Risk Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Features Section -->
   <section id="features" class="features">
     <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Built-In Smart Security Audits</h2>
-        <p class="section-desc">Four key dimensions combined with advanced heuristics protect your Gmail accounts effortlessly.</p>
+      <div class="section-title-wrapper">
+        <span class="section-tag">Security Dimensions</span>
+        <h2 class="section-title">Multi-Layered Safety Verification</h2>
       </div>
 
       <div class="features-grid">
         <!-- Feature 1 -->
-        <div class="feature-card">
-          <div class="feature-icon">🔍</div>
-          <h3 class="feature-card-title">Real-Time Badges</h3>
-          <p class="feature-card-desc">Injects instant visual indicators (Safe, Suspicious, Dangerous) right next to the email subject header in Gmail.</p>
+        <div class="glass-panel feature-card">
+          <span class="feature-icon">🔍</span>
+          <h3>Subject Header Badges</h3>
+          <p>Injects visual protection status badges (Safe, Suspicious, Dangerous) right next to incoming subject headers in Gmail.</p>
         </div>
 
         <!-- Feature 2 -->
-        <div class="feature-card">
-          <div class="feature-icon">📎</div>
-          <h3 class="feature-card-title">Attachment Scanner</h3>
-          <p class="feature-card-desc">Automatically alerts you if an email contains attachments with high-risk file extensions like .exe, .zip, or .js.</p>
+        <div class="glass-panel feature-card">
+          <span class="feature-icon">🌐</span>
+          <h3>Domain Age Audit</h3>
+          <p>Instantly queries WHOIS registries to flag sender domains registered within the last 30 days — a primary sign of phishing campaigns.</p>
         </div>
 
         <!-- Feature 3 -->
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3 class="feature-card-title">Security Dashboard</h3>
-          <p class="feature-card-desc">Track total emails scanned, threats blocked, and monitor your weekly trends with clean CSS bar charts.</p>
+        <div class="glass-panel feature-card">
+          <span class="feature-icon">📎</span>
+          <h3>Attachment Guards</h3>
+          <p>Filters and alerts you to executable or hidden scripts (.exe, .scr, .vbs, .js) packaged inside email attachments.</p>
         </div>
 
         <!-- Feature 4 -->
-        <div class="feature-card">
-          <div class="feature-icon">🌐</div>
-          <h3 class="feature-card-title">Domain Age Verification</h3>
-          <p class="feature-card-desc">Flags suspicious incoming domains registered in the last 30 days using real-time WHOIS database checks.</p>
+        <div class="glass-panel feature-card">
+          <span class="feature-icon">📊</span>
+          <h3>Local Scan Logs</h3>
+          <p>Maintains a private threat statistics history dashboard completely locally in Chrome Storage for absolute data privacy.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  </section>
+
+  <!-- Section 7: Traditional Filters vs MailArmour -->
+  <section id="comparison" class="mailarmour-comparison-section">
+    <div class="container">
+      <div class="mailarmour-comparison-title-wrapper">
+        <span class="mailarmour-comparison-tag">Engine Architecture</span>
+        <h2 class="mailarmour-comparison-title">TRADITIONAL FILTERS VS MAILARMOUR</h2>
+        <p class="mailarmour-comparison-subtitle">Modern phishing doesn't always look suspicious. MailArmour connects the clues traditional filters can miss.</p>
+      </div>
+
+      <div class="mailarmour-comparison-grid">
+        <!-- Left Panel: Traditional Filter -->
+        <div class="mailarmour-comparison-card traditional animate-stage">
+          <div class="mailarmour-comparison-card-header">
+            <h3 class="mailarmour-comparison-col-title">TRADITIONAL FILTERS</h3>
+            <span class="mailarmour-comparison-col-subtitle">Rule-based and reputation-driven detection</span>
+          </div>
+
+          <div class="mailarmour-comparison-checks-list">
+            <div class="comparison-check-item positive">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Known Malicious Sender</strong>
+                <span>Flagged if matches active blacklist databases</span>
+              </div>
+            </div>
+            <div class="comparison-check-item positive">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Spam Reputation</strong>
+                <span>Filters high-volume, low-reputation mail IP ranges</span>
+              </div>
+            </div>
+            <div class="comparison-check-item positive">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Known Malicious URL</strong>
+                <span>Blocks links matching static security blacklists</span>
+              </div>
+            </div>
+            <div class="comparison-check-item positive">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Attachment Signature</strong>
+                <span>Blocks files matching known malware hash keys</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mailarmour-comparison-limitation-header">
+            WHAT HAPPENS WHEN THE ATTACK IS NEW?
+          </div>
+
+          <div class="mailarmour-comparison-fictional-case">
+            <div class="fictional-case-row">
+              <span class="case-label">Sender:</span>
+              <span class="case-value">trusted-service@example.com</span>
+            </div>
+            <div class="fictional-case-row">
+              <span class="case-label">Authentication:</span>
+              <span class="case-value status-good">SPF ✓ | DKIM ✓ | DMARC ✓</span>
+            </div>
+            <div class="fictional-case-row">
+              <span class="case-label">URL Link:</span>
+              <span class="case-value">Legitimate trusted platform redirections</span>
+            </div>
+            <div class="fictional-case-row">
+              <span class="case-label">Reputation:</span>
+              <span class="case-value">Clean history, no previous reports</span>
+            </div>
+          </div>
+
+          <div class="mailarmour-comparison-verdict-box is-safe">
+            <div class="verdict-box-header">
+              <span>TRADITIONAL VERDICT</span>
+              <span class="verdict-tag-safe">LOW RISK</span>
+            </div>
+            <p class="verdict-box-desc">Looks legitimate in isolation. Static rules pass.</p>
+          </div>
+        </div>
+
+        <!-- Right Panel: MailArmour -->
+        <div class="mailarmour-comparison-card mailarmour animate-stage">
+          <div class="mailarmour-comparison-card-header">
+            <h3 class="mailarmour-comparison-col-title mailarmour-brand-color">MAILARMOUR</h3>
+            <span class="mailarmour-comparison-col-subtitle">Evidence-based, multi-layer phishing analysis</span>
+          </div>
+
+          <div class="mailarmour-comparison-checks-list">
+            <div class="comparison-check-item ma-layer" data-layer="identity">
+              <span class="check-num">01</span>
+              <div>
+                <strong>Identity Consistency</strong>
+                <span>Does the sender actually align with the claimed organization?</span>
+              </div>
+            </div>
+            <div class="comparison-check-item ma-layer" data-layer="auth">
+              <span class="check-num">02</span>
+              <div>
+                <strong>Authentication Deep Dive</strong>
+                <span>Validates SPF, DKIM, DMARC, and header consistency.</span>
+              </div>
+            </div>
+            <div class="comparison-check-item ma-layer" data-layer="domain">
+              <span class="check-num">03</span>
+              <div>
+                <strong>Domain Age & Impersonation</strong>
+                <span>Flags lookalikes registered within the last 30 days.</span>
+              </div>
+            </div>
+            <div class="comparison-check-item ma-layer" data-layer="url">
+              <span class="check-num">04</span>
+              <div>
+                <strong>URL & Redirect Analysis</strong>
+                <span>Inspects link redirects, encoding, and display mismatch.</span>
+              </div>
+            </div>
+            <div class="comparison-check-item ma-layer" data-layer="content">
+              <span class="check-num">05</span>
+              <div>
+                <strong>Content Harvesting Intent</strong>
+                <span>Detects credential harvesting, payment diversion, and urgency.</span>
+              </div>
+            </div>
+            <div class="comparison-check-item ma-layer" data-layer="behavior">
+              <span class="check-num">06</span>
+              <div>
+                <strong>Behavioral Correlation</strong>
+                <span>Flags social engineering urgency and malicious intents.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mailarmour-comparison-limitation-header mailarmour-brand-color">
+            MULTI-LAYERED CORRELATION MATRIX
+          </div>
+
+          <div class="mailarmour-comparison-matrix-flow">
+            <div class="matrix-node">Identity</div>
+            <span class="matrix-plus">+</span>
+            <div class="matrix-node">Auth</div>
+            <span class="matrix-plus">+</span>
+            <div class="matrix-node">Domain</div>
+            <span class="matrix-plus">+</span>
+            <div class="matrix-node">URL</div>
+            <span class="matrix-plus">+</span>
+            <div class="matrix-node">Content</div>
+            <span class="matrix-plus">+</span>
+            <div class="matrix-node">Behavior</div>
+          </div>
+
+          <div class="mailarmour-comparison-verdict-box is-threat">
+            <div class="verdict-box-header">
+              <span>MAILARMOUR VERDICT</span>
+              <span class="verdict-tag-threat">HIGH RISK</span>
+            </div>
+            <p class="verdict-box-desc">Correlated evidence reveals intent. Mismatched signals flag danger.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Differences Table/Cards -->
+      <div class="mailarmour-comparison-rows-wrapper animate-stage">
+        <div class="comparison-table-header">
+          <span>KEY COMPARISON DIMENSIONS</span>
+        </div>
+        
+        <!-- Row 1 -->
+        <div class="comparison-row-card">
+          <div class="row-card-feature">SIGNAL DETECTION</div>
+          <div class="row-card-cols">
+            <div class="row-card-traditional">
+              <span class="row-card-label">Traditional:</span>
+              <p>Checks known indicators in isolation</p>
+            </div>
+            <div class="row-card-mailarmour">
+              <span class="row-card-label">MailArmour:</span>
+              <p>Correlates multiple independent signals to find hidden contradictions</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="comparison-row-card">
+          <div class="row-card-feature">UNKNOWN THREATS</div>
+          <div class="row-card-cols">
+            <div class="row-card-traditional">
+              <span class="row-card-label">Traditional:</span>
+              <p>Often relies on historical threat reputation databases</p>
+            </div>
+            <div class="row-card-mailarmour">
+              <span class="row-card-label">MailArmour:</span>
+              <p>Can identify zero-day behavior patterns even when domains are brand new</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="comparison-row-card">
+          <div class="row-card-feature">IDENTITY VERIFICATION</div>
+          <div class="row-card-cols">
+            <div class="row-card-traditional">
+              <span class="row-card-label">Traditional:</span>
+              <p>Compares sender address string to reputation list</p>
+            </div>
+            <div class="row-card-mailarmour">
+              <span class="row-card-label">MailArmour:</span>
+              <p>Audits brand names against domain registry metadata and header integrity</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="comparison-row-card">
+          <div class="row-card-feature">URL ANALYSIS</div>
+          <div class="row-card-cols">
+            <div class="row-card-traditional">
+              <span class="row-card-label">Traditional:</span>
+              <p>Queries database for blacklisted URLs</p>
+            </div>
+            <div class="row-card-mailarmour">
+              <span class="row-card-label">MailArmour:</span>
+              <p>Inspects URL structures, redirects, lookalike character encodings, and destinations</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="comparison-row-card">
+          <div class="row-card-feature">CONTENT AUDIT</div>
+          <div class="row-card-cols">
+            <div class="row-card-traditional">
+              <span class="row-card-label">Traditional:</span>
+              <p>Flags specific static words or simple content matches</p>
+            </div>
+            <div class="row-card-mailarmour">
+              <span class="row-card-label">MailArmour:</span>
+              <p>Parses context to detect social-engineering techniques and collection intents</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Philosophy Block -->
+      <div class="mailarmour-comparison-philosophy animate-stage">
+        <h3 class="philosophy-title">"One signal can be misleading. Correlated evidence tells the story."</h3>
+        <p class="philosophy-subtitle">MailArmour doesn't rely on a single clue. It connects identity, authentication, URLs, content, and behavior to determine whether a message deserves trust.</p>
       </div>
     </div>
   </section>
@@ -520,41 +557,41 @@
   <!-- Pricing Section -->
   <section id="pricing" class="pricing">
     <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Affordable Protection Plans</h2>
-        <p class="section-desc">Start protecting your personal account for free, or upgrade to unlock comprehensive power tools.</p>
+      <div class="section-title-wrapper">
+        <span class="section-tag">Pricing Rules</span>
+        <h2 class="section-title">Straightforward, Sincere Pricing</h2>
       </div>
 
       <div class="pricing-grid">
-        <!-- Free Tier -->
-        <div class="pricing-card free-tier">
-          <h3 class="tier-name">Free Shield</h3>
-          <div class="tier-price">$0 <span>/ forever</span></div>
-          <ul class="tier-features">
-            <li>10 Monthly Inbox Scans</li>
-            <li>Interactive Security Checklist</li>
-            <li>Basic Attachment Verification</li>
+        <!-- Free tier -->
+        <div class="glass-panel pricing-card free">
+          <div class="tier-name">Free Shield</div>
+          <div class="tier-price">$0 <span>/ lifetime</span></div>
+          <ul class="features-list">
+            <li>10 Lifetime Inbox Scans</li>
+            <li>Sender Authenticity Checks</li>
+            <li>Basic Attachment Guards</li>
             <li>Hindi translation UI support</li>
-            <li class="pro-only">Smart Domain Age Check</li>
-            <li class="pro-only">Export PDF Reports</li>
-            <li class="pro-only">Full 50 scan history</li>
+            <li class="unsupported">WHOIS Domain Age Registry</li>
+            <li class="unsupported">Private Dashboard Stats</li>
+            <li class="unsupported">Export threat report logs</li>
           </ul>
-          <a href="https://chrome.google.com/webstore/detail/mailarmour" target="_blank" class="btn btn-outline" style="margin-top: auto;">Install Free Extension</a>
+          <a href="https://chrome.google.com/webstore/detail/mailarmour" target="_blank" class="btn btn-outline" style="margin-top: auto;">Install Chrome Extension</a>
         </div>
 
-        <!-- Pro Tier -->
-        <div class="pricing-card premium-tier">
-          <h3 class="tier-name">Pro Shield</h3>
-          <div class="tier-price">$5 <span>/ month</span></div>
-          <ul class="tier-features">
-            <li>Unlimited Inbox Scans</li>
-            <li>Interactive Security Checklist</li>
-            <li>Advanced Attachment Verification</li>
+        <!-- Pro tier -->
+        <div class="glass-panel pricing-card premium">
+          <div class="tier-name" style="color: #60a5fa;">Pro Shield</div>
+          <div class="tier-price">$2.99 <span>/ month</span></div>
+          <ul class="features-list">
+            <li>Unlimited Inbox Scanning</li>
+            <li>Sender Authenticity Checks</li>
+            <li>Advanced Attachment Guards</li>
             <li>Hindi translation UI support</li>
-            <li>Real-time Domain Age Checks</li>
-            <li>Detailed PDF Reports Export</li>
-            <li>Complete 50 Scan History storage</li>
-            <li>Priority email support</li>
+            <li>WHOIS Domain Age Registry</li>
+            <li>Private Dashboard Stats (50 logs)</li>
+            <li>Export reports (PDF, CSV, JSON)</li>
+            <li>Priority developer email support</li>
           </ul>
           <a href="https://mailarmour.gumroad.com/l/pro" target="_blank" class="btn btn-primary" style="margin-top: auto;">Upgrade to Pro Shield</a>
         </div>
@@ -562,14 +599,104 @@
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- FAQ Section -->
+  <section id="faq" class="faq">
+    <div class="container">
+      <div class="section-title-wrapper">
+        <span class="section-tag">Common Inquiries</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-holder">
+        <div class="faq-item">
+          <button class="faq-trigger">
+            Is my email content safe with MailArmour?
+            <span class="faq-icon-tag">+</span>
+          </button>
+          <div class="faq-body">
+            <div class="faq-answer">
+              Yes, entirely. We prioritize user privacy: all scans run inside your local browser. We do not store, aggregate, or sell your emails. Refer to our <a href="privacy.html" style="color: var(--primary); text-decoration: none;">Privacy Policy</a> for more details.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-trigger">
+            How does the Domain Age check work?
+            <span class="faq-icon-tag">+</span>
+          </button>
+          <div class="faq-body">
+            <div class="faq-answer">
+              Most phishing domains are registered immediately before a scam campaign. MailArmour checks domain registration dates via WHOIS databases in real-time. If the sender's domain is less than 30 days old, it triggers a warning badge.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-trigger">
+            Can I manage white-listed domains?
+            <span class="faq-icon-tag">+</span>
+          </button>
+          <div class="faq-body">
+            <div class="faq-answer">
+              Yes. If you frequently receive legitimate emails that flag local heuristics, you can add them to your private Whitelist domain exception page to bypass alerts.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-trigger">
+            Does the extension support multiple languages?
+            <span class="faq-icon-tag">+</span>
+          </button>
+          <div class="faq-body">
+            <div class="faq-answer">
+              Yes, MailArmour has built-in UI localization support for Hindi, allowing users to view threat alerts and security status logs in their preferred language.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer Footer -->
   <footer>
     <div class="container">
-      <div class="brand" style="justify-content: center; margin-bottom: 16px;">
-        <span class="brand-name" style="font-size: 20px;">MailArmour</span>
+      <div class="footer-top">
+        <div class="footer-intro">
+          <a href="#" class="brand">
+            <img src="Logo.png" alt="MailArmour Logo" class="footer-logo" style="max-height: 32px; width: auto; display: block;" />
+          </a>
+          <p class="footer-tagline">
+            An independent security tool protecting Gmail accounts from credential harvesters, Business Email Compromise, and attachment scams.
+          </p>
+        </div>
+
+        <div class="footer-column">
+          <h4>Navigation</h4>
+          <ul class="footer-links">
+            <li><a href="#features">Audits</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <ul class="footer-links">
+            <li><a href="terms.html">Terms & Conditions</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="mailto:mailarmour.app@gmail.com">Contact Developers</a></li>
+          </ul>
+        </div>
       </div>
-      <p>&copy; 2026 MailArmour security. All rights reserved. Keep your inbox safe. | <a href="terms.html" style="color: var(--text-muted); text-decoration: none; transition: var(--transition);" onmouseover="this.style.color='#f3f4f6'" onmouseout="this.style.color='var(--text-muted)'">Terms & Conditions</a></p>
+
+      <div class="footer-bottom">
+        <span>&copy; 2026 MailArmour. All rights reserved. Created by independent security developers.</span>
+      </div>
     </div>
   </footer>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
 </body>
 </html>
