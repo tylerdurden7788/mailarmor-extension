@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initComparisonLensAnimation();
   initFaqAccordion();
   initXpThemeSwitcher();
+  initSoundEffects();
 });
 
 /**
@@ -386,6 +387,11 @@ function initOceanHero() {
   let isCursorActive = false;
   let seaStartY = 0;
 
+  // Cached layout dimensions for performance (prevents forced layout thrashing)
+  let cachedContainerRect = container.getBoundingClientRect();
+  let cachedBoatCenterX = 0;
+  let cachedBoatCenterY = 0;
+
   // Phase 3: Pack Layout coordinates (Executed on load and resize shifts)
   function packLayout() {
     if (bubbles.length === 0) return;
@@ -396,6 +402,11 @@ function initOceanHero() {
     // Dynamically calculate the bottom edge of the boat hull relative to container top
     const boatRect = boatEl.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
+    cachedContainerRect = containerRect; // Update cache
+    
+    cachedBoatCenterX = boatRect.left + boatRect.width / 2 - containerRect.left;
+    cachedBoatCenterY = boatRect.top + boatRect.height / 2 - containerRect.top;
+
     const boatBottomY = (boatRect.top - containerRect.top) + boatRect.height * (115 / 160);
     seaStartY = boatBottomY + 2; // Tightly sit 2px directly below boat hull
 
@@ -526,12 +537,7 @@ function initOceanHero() {
   function updateSpeechBubbleProximity(mouseX, mouseY) {
     if (!speechBubble || !boatEl) return;
 
-    const containerRect = container.getBoundingClientRect();
-    const boatRect = boatEl.getBoundingClientRect();
-    const boatCenterX = boatRect.left + boatRect.width / 2 - containerRect.left;
-    const boatCenterY = boatRect.top + boatRect.height / 2 - containerRect.top;
-
-    const distToBoat = Math.hypot(mouseX - boatCenterX, mouseY - boatCenterY);
+    const distToBoat = Math.hypot(mouseX - cachedBoatCenterX, mouseY - cachedBoatCenterY);
     const distToHook = Math.hypot(mouseX - currentX, mouseY - currentY);
 
     // Show bubble if cursor is near the Phisher/boat or the hook
@@ -564,9 +570,8 @@ function initOceanHero() {
   container.addEventListener('pointermove', (e) => {
     if (caughtIncident) return; // Do not move hook with cursor while snapping/modal is open
 
-    const rect = container.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const mouseX = e.clientX - cachedContainerRect.left;
+    const mouseY = e.clientY - cachedContainerRect.top;
 
     updateSpeechBubbleProximity(mouseX, mouseY);
 
@@ -765,5 +770,174 @@ function initXpThemeSwitcher() {
       localStorage.setItem(storageKey, 'luna');
     }
   });
+}
+
+/**
+ * 8. Retro Sound Effects & Properties Sheet Interactive Controls Framework
+ */
+function initSoundEffects() {
+  const storageKey = 'mailarmour-sound-enabled';
+  let soundEnabled = localStorage.getItem(storageKey) !== 'false'; // Default to true
+  
+  const startupSound = new Audio('xp_startup.wav');
+  const errorSound = new Audio('xp_error.wav');
+  
+  // Create UI elements
+  const selectContainer = document.querySelector('.xp-theme-selector-container');
+  if (!selectContainer) return;
+  
+  const soundBtn = document.createElement('button');
+  soundBtn.className = 'xp-sound-btn';
+  soundBtn.innerHTML = soundEnabled ? '🔊 Sound: On' : '🔇 Sound: Off';
+  
+  selectContainer.appendChild(soundBtn);
+  
+  const updateBtnUI = () => {
+    soundBtn.innerHTML = soundEnabled ? '🔊 Sound: On' : '🔇 Sound: Off';
+  };
+  
+  soundBtn.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem(storageKey, soundEnabled ? 'true' : 'false');
+    updateBtnUI();
+    if (soundEnabled) {
+      startupSound.play().catch(e => console.log('Audio autoplay prevented:', e));
+    }
+  });
+  
+  // Play startup sound on load if enabled (limited to first 3 seconds of load)
+  const playStartupOnce = () => {
+    document.removeEventListener('click', playStartupOnce);
+    if (soundEnabled && performance.now() < 3000) {
+      startupSound.play().catch(e => console.log('Autoplay blocked:', e));
+    }
+  };
+  document.addEventListener('click', playStartupOnce);
+  
+  // Hook error sound into phisher scan hover clues
+  const clues = document.querySelectorAll('.email-clue-highlight');
+  clues.forEach(clue => {
+    clue.addEventListener('mouseenter', () => {
+      if (soundEnabled) {
+        errorSound.currentTime = 0;
+        errorSound.play().catch(e => console.log('Audio play failed:', e));
+      }
+    });
+  });
+
+  // Dynamically inject real DOM help/close buttons into pricing card tier-names
+  const tierNames = document.querySelectorAll('.tier-name');
+  tierNames.forEach(tier => {
+    // Ensure relative position on tier container
+    tier.style.position = 'relative';
+
+    const helpSpan = document.createElement('span');
+    helpSpan.className = 'xp-btn-help';
+    helpSpan.innerText = '?';
+    
+    const closeSpan = document.createElement('span');
+    closeSpan.className = 'xp-btn-close';
+    closeSpan.innerText = '✕';
+    
+    tier.appendChild(helpSpan);
+    tier.appendChild(closeSpan);
+
+    // Help button click logic
+    helpSpan.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (soundEnabled) {
+        errorSound.currentTime = 0;
+        errorSound.play().catch(ex => console.log('Audio play failed:', ex));
+      }
+      showXpHelpAlert();
+    });
+
+    // Close button click logic
+    closeSpan.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (soundEnabled) {
+        errorSound.currentTime = 0;
+        errorSound.play().catch(ex => console.log('Audio play failed:', ex));
+      }
+      showXpSecurityAlert();
+    });
+  });
+}
+
+/**
+ * 9. Custom Windows XP System Warning Dialog Boxes
+ */
+function showXpSecurityAlert() {
+  if (document.getElementById('xp-security-alert-modal')) return;
+  
+  const modal = document.createElement('div');
+  modal.id = 'xp-security-alert-modal';
+  modal.className = 'modal-overlay';
+  modal.style.zIndex = '9999';
+  
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 400px; width: 90%; transform: translate(-50%, -50%); position: fixed; top: 50%; left: 50%;">
+      <div class="modal-header" style="background: linear-gradient(90deg, #0058e6 0%, #3a93ff 100%) !important;">
+        <span class="modal-title">Windows Security Alert</span>
+        <button class="modal-close" id="xp-alert-close-x">✕</button>
+      </div>
+      <div class="xp-alert-body" style="padding: 16px; display: flex; gap: 14px; align-items: flex-start;">
+        <div style="font-size: 32px; flex-shrink: 0; line-height: 1; user-select: none;">⚠️</div>
+        <div style="font-family: 'Tahoma', sans-serif; font-size: 12px; line-height: 1.4; padding-top: 4px;">
+          Warning: You cannot close this properties sheet. Protecting your inbox with MailArmour is mandatory!
+        </div>
+      </div>
+      <div class="modal-footer class="xp-alert-body" style="border-top: none; display: flex; justify-content: center; padding-bottom: 16px;">
+        <button class="btn btn-secondary" id="xp-alert-ok-btn" style="min-width: 75px; background: #ECE9D8 !important; color: #000000 !important; border: 2px solid !important; border-top-color: #FFFFFF !important; border-left-color: #FFFFFF !important; border-right-color: #808080 !important; border-bottom-color: #808080 !important; box-shadow: inset 1px 1px 0 #FFFFFF !important; font-weight: normal !important;">OK</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  const closeAlert = () => {
+    modal.remove();
+  };
+  
+  document.getElementById('xp-alert-close-x').addEventListener('click', closeAlert);
+  document.getElementById('xp-alert-ok-btn').addEventListener('click', closeAlert);
+}
+
+function showXpHelpAlert() {
+  if (document.getElementById('xp-help-alert-modal')) return;
+  
+  const modal = document.createElement('div');
+  modal.id = 'xp-help-alert-modal';
+  modal.className = 'modal-overlay';
+  modal.style.zIndex = '9999';
+  
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 400px; width: 90%; transform: translate(-50%, -50%); position: fixed; top: 50%; left: 50%;">
+      <div class="modal-header" style="background: linear-gradient(90deg, #0058e6 0%, #3a93ff 100%) !important;">
+        <span class="modal-title">MailArmour Help</span>
+        <button class="modal-close" id="xp-help-close-x">✕</button>
+      </div>
+      <div class="xp-alert-body" style="padding: 16px; display: flex; gap: 14px; align-items: flex-start;">
+        <div style="font-size: 32px; flex-shrink: 0; line-height: 1; user-select: none;">ℹ️</div>
+        <div style="font-family: 'Tahoma', sans-serif; font-size: 12px; line-height: 1.4; padding-top: 4px;">
+          Need assistance? Please consult the User Guide or contact development support at support@mailarmour.com.
+        </div>
+      </div>
+      <div class="modal-footer class="xp-alert-body" style="border-top: none; display: flex; justify-content: center; padding-bottom: 16px;">
+        <button class="btn btn-secondary" id="xp-help-ok-btn" style="min-width: 75px; background: #ECE9D8 !important; color: #000000 !important; border: 2px solid !important; border-top-color: #FFFFFF !important; border-left-color: #FFFFFF !important; border-right-color: #808080 !important; border-bottom-color: #808080 !important; box-shadow: inset 1px 1px 0 #FFFFFF !important; font-weight: normal !important;">OK</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  const closeAlert = () => {
+    modal.remove();
+  };
+  
+  document.getElementById('xp-help-close-x').addEventListener('click', closeAlert);
+  document.getElementById('xp-help-ok-btn').addEventListener('click', closeAlert);
 }
 
